@@ -1,7 +1,6 @@
 // noinspection JSUnresolvedReference
 const toml = require('toml');
 const fs = require("node:fs");
-const schedule = require('node-schedule');
 require("dotenv")
 require('./const')
 
