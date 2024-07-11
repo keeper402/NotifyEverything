@@ -1,0 +1,44 @@
+# 30分钟重新加载一次
+reload_interval = 30
+# 资源
+[source.js1]
+name = 'source1'
+type = 'js'
+source = 'http://xxxx/xxx'
+
+[source.ASharesPrice]
+type = 'rest'
+url = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000001&scale=240&ma=5&datalen=1'
+method = 'GET'
+header = ''
+body = '' # 使用post填body
+result = '$[0].low' # 默认为请求结果的body
+
+
+[notify]
+[notify.dingbot]
+type = 'webhook'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=XXXXXX'
+method = 'post'
+header = '{"token":"DI****LK","content-type":"application/json; charset=utf-8","content-length":"630","host":"hz*****80","connection":"Keep-Alive","accept-encoding":"gzip","user-agent":"okhttp/3.5.0"}'
+body = '{"msgtype":"text","text":{"content":"${msg}"}}'
+
+
+[schedule]
+#myTask是我的自定义任务
+[schedule.myTimer]
+corn = '0 0 */2 * * *'
+notify = 'dingbot'
+msg = '每隔两小时提醒你喝水啦'
+
+[rule]
+# 默认检查间隔
+default_interval = 10
+
+# 每分钟检查癌股是不是又3000点以下了
+[rule.1mincheckASharesBelow3000]
+interval = 1
+condition = "${ASharesPrice} < 3000 && '${js1}'.length > 0"
+muteAfterHit = 300 #命中不再检查5小时
+notify = 'dingbot'
+msg = '傻B大A又下3000点了，今天最低点：${ASharesPrice}'
