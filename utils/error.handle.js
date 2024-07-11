@@ -2,7 +2,7 @@ const {getNotifyConfig, notify} = require("../components/notify");
 const {DEFAULT_ERROR_NOTIFY_MSG} = require("../config/const");
 const logger = require("./logger");
 
-function handle(f) {
+function handleFunctionError(f) {
     try {
         f();
     } catch (e) {
@@ -11,7 +11,7 @@ function handle(f) {
 }
 
 function handleError(e, msg) {
-    logger.error(e, msg);
+    logger.error(msg, e);
     notifyError(e, msg).then();
 }
 
@@ -35,4 +35,4 @@ async function notifyMsg(errMsg) {
     await notify(notifyConfig, errMsg);
 }
 
-module.exports = {handleError};
+module.exports = {handleError, handleFunctionError};

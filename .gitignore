@@ -3,6 +3,7 @@ doc
 .git
 .env
 node_modules
+logs
 
 config.toml
 

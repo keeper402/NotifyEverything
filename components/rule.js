@@ -24,24 +24,23 @@ function addRule(ruleName, ruleConfig) {
     while ((match = regex.exec(ruleConfig.condition)) !== null) {
         resourceNames.push(match[1]);
     }
-    //map resourceName => getResource function
-    let getResourceMap = new Map();
-    for (let resourceName of resourceNames) {
-        const resourceConfig = getResourceConfig(resourceName);
-        let resourceCall = getResourceCall(resourceConfig);
-        if (resourceCall !== undefined) {
-            getResourceMap.set(resourceName, resourceCall);
-        }
-    }
     ruleConfig.context = {
         ruleName: ruleName,
-        ruleConfig: ruleConfig,
         allTimes: 0,
         notifyTimes: 0,
         errorTimes: 0,
         timestamp: null,
         lastNotify: null,
         lastCheckCondition: null,
+    }
+    //map resourceName => getResource function
+    let getResourceMap = new Map();
+    for (let resourceName of resourceNames) {
+        const resourceConfig = getResourceConfig(resourceName);
+        let resourceCall = getResourceCall(resourceConfig, ruleConfig.context);
+        if (resourceCall !== undefined) {
+            getResourceMap.set(resourceName, resourceCall);
+        }
     }
 
     // Closure for checkAndNotify

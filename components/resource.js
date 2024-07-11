@@ -2,23 +2,25 @@ const request = require('../utils/request');
 const jsonpath = require('jsonpath');
 const {evaluate} = require("../utils/evaluate");
 const logger = require("../utils/logger");
+const lodash = require('lodash');
+const {handleFunctionError} = require("../utils/error.handle");
 
 function getResourceConfig(name) {
     try {
         return jsonpath.query(global.config, `$.resource.${name}`)[0];
     } catch (e) {
-        logger.error(e, 'invalid resource: ' + name);
+        logger.error('invalid resource: ' + name, e);
     }
 }
 
-function getResourceCall(resourceConfig) {
+function getResourceCall(resourceConfig, ruleContext) {
     if (resourceConfig.type === 'rest') {
         return () => {
-            return rest(resourceConfig);
+            return handleFunctionError(() => rest(resourceConfig));
         }
     } else if (resourceConfig.type === 'js') {
         return () => {
-            return jsScript(resourceConfig);
+            return handleFunctionError(() => jsScript(resourceConfig, ruleContext));
         }
     }
     return undefined;
@@ -31,9 +33,13 @@ async function rest(restConfig) {
     return result;
 }
 
-async function jsScript(jsConfig) {
-    const data = await request.handleHttpRequest(jsConfig.url, 'GET', '');
-    return await evaluate(data);
+async function jsScript(jsConfig, ruleContext) {
+    let param = null;
+    if (!lodash.isEmpty(jsConfig.param)) {
+        param = JSON.parse(jsConfig.param);
+    }
+    const script = await request.handleHttpRequest(jsConfig.url, 'GET', '');
+    return await evaluate(script, param, ruleContext);
 }
 
 module.exports = {getResourceConfig, getResourceCall}

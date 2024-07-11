@@ -1,23 +1,22 @@
-const { createLogger, format, transports } = require("winston");
+const {createLogger, format, transports} = require("winston");
+// const winston = require("winston");
 
 const logger = createLogger({
     level: 'info',
     format: format.combine(
-        format.timestamp({ format: "MMM-DD-YYYY HH:mm:ss" }),
+        format.timestamp({format: "MMM-DD-YYYY HH:mm:ss"}),
         format.align(),
+        // format.errors({ stack: true }),
         format.printf(
             (info) =>
-                `${[info.timestamp]} [${info.level}]: ${info.message}`
+                `${[info.timestamp]} [${info.level}]: ${info.message} ${info.stack === undefined ? `` : `\n${info.stack}`}`,
         )
     ),
     transports: [
         new transports.Console(),
-        new transports.File({ filename: 'log/error.log', level: 'error' }),
-        new transports.File({ filename: 'log/combined.log' })
+        new transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new transports.File({ filename: 'logs/combined.log' })
     ]
 });
-
-logger.info('Hello, Winston!');
-logger.error('Oops, something went wrong!');
 
 module.exports = logger;

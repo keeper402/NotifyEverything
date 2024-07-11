@@ -25,7 +25,7 @@ function getNotifyConfig(name) {
     try {
         return jsonpath.query(config, `$.notify.${name}`)[0];
     } catch (e) {
-        logger.error(e, 'invalid notify: ' + name);
+        logger.error('invalid notify: ' + name, e);
     }
     return undefined;
 }

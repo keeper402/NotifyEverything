@@ -1,4 +1,5 @@
 const {DEFAULT_ERROR_NOTIFY_MSG} = require("../config/const");
+const lodash = require('lodash');
 
 function testTemplateString() {
     let e;
@@ -11,3 +12,6 @@ function testTemplateString() {
     const msg = eval('`' + DEFAULT_ERROR_NOTIFY_MSG + '`');
     console.log(msg);
 }
+
+
+console.info(lodash.isEmpty(''));

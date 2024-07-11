@@ -1,6 +1,6 @@
 const logger = require("./logger");
 
-async function evaluate(jsText) {
+async function evaluate(jsText, param, context) {
     // Wrap the eval in an async function to handle asynchronous code
     const asyncEval = async (code) => {
         return await eval(`(async () => {
