@@ -8,7 +8,7 @@ const config = require('./config/config.js');
 // db.sync();
 // const router = require('./config/router');
 const app = express();
-config.init();
+config.init().then();
 
 // app.use('/doc', express.static('./doc'));
 // app.use(expressValidator());

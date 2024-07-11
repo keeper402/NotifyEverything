@@ -1,31 +1,52 @@
 // noinspection JSUnresolvedReference
 const toml = require('toml');
 const fs = require("node:fs");
-require("dotenv")
+const http = require("node:http");
+require("dotenv").config()
 require('./const')
+const https = require("node:https");
 
 let config;
 
 let init_fin = false;
 
-function loadConfig() {
+const getConfig = async () => {
+    return new Promise((resolve, reject) => {
+        https.get(process.env.CONFIG_FILE, (res) => {
+            let data = '';
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+            res.on('end', () => {
+                resolve(toml.parse(data));
+            });
+        }).on('error', (err) => {
+            reject(err);
+        });
+    });
+};
+
+async function loadConfig() {
     if (process.env.CONFIG_FILE !== undefined) {
-        let buffer = fs.readFileSync(process.env.CONFIG_FILE);
-        config = toml.parse(buffer.toString('utf-8'));
+        try {
+            config = await getConfig();
+        } catch (e) {
+            console.error(e);
+        }
     } else if (process.env.DEFAULT_CONFIG !== undefined) {
         config = toml.parse(process.env.DEFAULT_CONFIG);
     } else {
         let buffer = fs.readFileSync('./config.toml');
         config = toml.parse(buffer.toString('utf-8'));
     }
-    console.log('config: ' + config);
+    console.log('config: ' + JSON.stringify(config));
 }
 
-function init() {
+async function init() {
     if (init_fin) {
         return;
     }
-    loadConfig();
+    await loadConfig();
     const interval = config.reload_interval || DEFAULT_RELOAD_INTERVAL;
     setInterval(loadConfig, 1000 * 60 * interval);
     init_fin = true;
