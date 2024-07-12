@@ -3,3 +3,5 @@ doc
 .git
 .env
 node_modules
+
+config.toml

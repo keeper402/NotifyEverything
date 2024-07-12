@@ -2,13 +2,13 @@ const express = require('express');
 const expressValidator = require('express-validator');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const config = require('./config/config.js');
+const config = require("./config/configuration");
 
 // const db = require('./config/db');
 // db.sync();
 // const router = require('./config/router');
 const app = express();
-config.init().then();
+init();
 
 // app.use('/doc', express.static('./doc'));
 // app.use(expressValidator());
@@ -16,6 +16,9 @@ config.init().then();
 // app.use(bodyParser.json());
 // app.use(cors());
 
+function init() {
+    config.init().then();
+}
 
 // router(app);
 const port = process.env.port || 3000;
