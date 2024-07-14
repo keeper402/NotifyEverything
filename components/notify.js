@@ -14,7 +14,7 @@ async function webhook(notifyConfig, msg) {
     logger.info(response);
 }
 
-async function notify(notifyConfig, msg) {
+async function notify(notifyConfig, msg, context) {
     if (notifyConfig.type === "webhook") {
         await webhook(notifyConfig, msg);
     }

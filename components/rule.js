@@ -11,8 +11,6 @@ let ruleJobs = new Map();
 let rules = new Map();
 let defaultInterval = 30;
 
-let initialized = false;
-
 const lastNotify = new Map();
 
 function addRule(ruleName, ruleConfig) {
@@ -35,9 +33,22 @@ function addRule(ruleName, ruleConfig) {
             getResourceMap.set(resourceName, resourceCall);
         }
     }
+    ruleConfig.context = {
+        ruleName: ruleName,
+        ruleConfig: ruleConfig,
+        allTimes: 0,
+        notifyTimes: 0,
+        errorTimes: 0,
+        timestamp: null,
+        lastNotify: null,
+        lastCheckCondition: null,
+    }
+
     // Closure for checkAndNotify
     const checkConditionAndNotify = async function () {
+        const context = ruleConfig.context;
         try {
+            context.allTimes++;
             let resourceValues = new Map();
             for (let key of getResourceMap.keys()) {
                 const resource = await getResourceMap.get(key)();
@@ -46,8 +57,11 @@ function addRule(ruleName, ruleConfig) {
             // replace resource var
             let condition = replaceVariables(ruleConfig.condition, resourceValues);
             let msg = replaceVariables(ruleConfig.msg, resourceValues);
+            context.timestamp = Date.now();
             // check condition
-            if (eval(condition) === true) {
+            const checkCondition = eval(condition);
+            context.lastCheckCondition = Date.now();
+            if (checkCondition === true) {
                 const notifyConfig = notify.getNotifyConfig(ruleConfig.notify)
                 const lastTime = lastNotify.get(ruleName);
                 // check muteAfterNotify
@@ -56,10 +70,14 @@ function addRule(ruleName, ruleConfig) {
                     return;
                 }
                 // do notify
-                await notify.notify(notifyConfig, msg);
-                lastNotify.put(ruleName, Date.now());
+                await notify.notify(notifyConfig, msg, context);
+                const now = Date.now();
+                context.lastNotify = now;
+                context.notifyTimes++;
+                lastNotify.put(ruleName, now);
             }
         } catch (e) {
+            context.errorTimes++;
             handleError(e, `error happened when execute rule ${ruleName}`);
         }
     };

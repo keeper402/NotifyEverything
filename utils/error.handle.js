@@ -15,6 +15,7 @@ function handleError(e, msg) {
     notifyError(e, msg).then();
 }
 
+// params for eval template string
 async function notifyError(e, errMsg) {
     const notifyName = config.errorNotify;
     const notifyConfig = getNotifyConfig(notifyName);
