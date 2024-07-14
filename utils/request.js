@@ -1,4 +1,5 @@
 const axios = require('axios')
+const logger = require("./logger");
 
 function doHttpRequest(url, method, body, headers) {
     if (typeof headers === 'string') {
@@ -12,12 +13,11 @@ function doHttpRequest(url, method, body, headers) {
             data: body
         })
             .then(res => {
-                console.log(`状态码: ${res.status}`)
-                console.log(res)
+                logger.info(`状态码: ${res.status}, res: ${res}`);
                 resolve(res);
             })
             .catch(error => {
-                console.error(error);
+                logger.error(error);
                 reject(error);
             })
 
@@ -25,17 +25,11 @@ function doHttpRequest(url, method, body, headers) {
 }
 
 async function handleHttpRequest(url, method, body, headers) {
-    try {
-        const response = await doHttpRequest(url, method, body, headers);
-        if (response.status !== 200) {
-            // todo send error notify
-            console.error(`response returned status ${response.status} and body: ${JSON.stringify(response)}`);
-        }
-        return response.data;
-    } catch (err) {
-        // todo send error notify
-        console.error(err);
+    const response = await doHttpRequest(url, method, body, headers);
+    if (response.status !== 200) {
+        logger.error(`response returned status ${response.status} and body: ${JSON.stringify(response)}`);
     }
+    return response.data;
 }
 
 async function get(url, headers) {

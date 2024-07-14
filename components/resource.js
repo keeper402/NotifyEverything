@@ -1,12 +1,13 @@
 const request = require('../utils/request');
 const jsonpath = require('jsonpath');
 const {evaluate} = require("../utils/evaluate");
+const logger = require("../utils/logger");
 
 function getResourceConfig(name) {
     try {
         return jsonpath.query(global.config, `$.resource.${name}`)[0];
     } catch (e) {
-        console.error(e, 'invalid resource: ' + name);
+        logger.error(e, 'invalid resource: ' + name);
     }
 }
 
@@ -26,7 +27,7 @@ function getResourceCall(resourceConfig) {
 async function rest(restConfig) {
     const data = await request.handleHttpRequest(restConfig.url, restConfig.method, restConfig.body, restConfig.headers);
     const result = jsonpath.query(data, restConfig.result);
-    console.log(result);
+    logger.info(result);
     return result;
 }
 

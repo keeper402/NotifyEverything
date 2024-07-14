@@ -1,3 +1,5 @@
+const logger = require("./logger");
+
 async function evaluate(jsText) {
     // Wrap the eval in an async function to handle asynchronous code
     const asyncEval = async (code) => {
@@ -10,7 +12,7 @@ async function evaluate(jsText) {
         // Execute the code and get the result
         return await asyncEval(jsText);
     } catch (error) {
-        console.error('Error evaluating jsScript:\n' + jsText, error);
+        logger.error('Error evaluating jsScript:\n' + jsText, error);
         return false;
     }
 }

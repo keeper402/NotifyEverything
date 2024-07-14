@@ -1,40 +1,44 @@
 # 30分钟重新加载一次本配置
-reload_interval = 30
+reloadInterval = 30
+
+#默认异常内容
+errorNotify='dingbot'
+#异常消息
+errorNotifyMsg='error: ${e.toString()}, errorMsg: ${errMsg}'
 # js脚本获取数据
 [resource.jsForExample]
 type = 'js'
-url = 'https://gist.githubusercontent.com/keeper402/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/raw/test.js'
-
-# 这个接口是按日的，只能获取到前一天的数据。仅作示例
+url = 'https://gist.githubusercontent.com/keeper402/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/raw/test.js'
+# rest接口获取数据
 [resource.ASharesPrice]
 type = 'rest'
+# 这个接口是按日的，只能获取到前一天的数据。仅作示例
 url = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000001&scale=240&ma=5&datalen=1'
 method = 'GET'
-#headers = '' # 没有header就不要设置，设置空字符串会报错
+headers = '' # 没有header就不要设置，设置空字符串会报错
 body = '' # 使用post填body
 result = '$[0].low' # 使用jsonPath取对象。
 
 #webhook通知方式 钉钉机器人
 [notify.dingbot]
 type = 'webhook'
-url = 'https://oapi.dingtalk.com/robot/send?access_token=733xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe3f7'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 method = 'post'
 headers = '{"content-type":"application/json;charset=utf-8"}'
 body = '{"msgtype":"text","text":{"content":"通知：${msg}"}}'
+
+#[notify.qqMail]
+#type='mail'
+#from=''
+#to=''
+#pass=''
 
 # 规则， 资源+条件+定时=>通知
 # 检查癌股是不是又3000点以下了
 [rule.checkASharesBelow3000]
 interval = 1 # 每间隔1分钟执行一次检查
-corn = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
+#cron = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
 condition = "${ASharesPrice} < 3000 && !${jsForExample}"
-muteAfterNotify = 300 #命中不再检查5小时/重载配置失效
+muteAfterNotify = 300 #命中不再检查5小时/重载配置以后取消mute
 notify = 'dingbot'
 msg = '测试发送：${ASharesPrice}'
-
-# 工作日10,14,16点叫自己喝水
-[rule.drinkWater]
-corn = '0 0 10,14,16 ? * MON-FRI '
-condition = "true"
-notify = 'dingbot'
-msg = '放下工作情节，尊重喝水命运'

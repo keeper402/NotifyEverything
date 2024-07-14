@@ -1,6 +1,7 @@
 const {handleHttpRequest} = require("../utils/request");
 const {replaceVariable} = require("../utils/strings");
 const jsonpath = require("jsonpath");
+const logger = require("../utils/logger");
 
 
 async function webhook(notifyConfig, msg) {
@@ -10,7 +11,7 @@ async function webhook(notifyConfig, msg) {
     }
     let body = replaceVariable(notifyConfig.body, 'msg', msg);
     const response = await handleHttpRequest(url, notifyConfig.method, body, notifyConfig.headers);
-    console.log(response);
+    logger.info(response);
 }
 
 async function notify(notifyConfig, msg) {
@@ -24,7 +25,8 @@ function getNotifyConfig(name) {
     try {
         return jsonpath.query(config, `$.notify.${name}`)[0];
     } catch (e) {
-        console.error(e, 'invalid notify: ' + name);
+        logger.error(e, 'invalid notify: ' + name);
     }
+    return undefined;
 }
 module.exports = {notify, getNotifyConfig}
