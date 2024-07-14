@@ -1,6 +1,6 @@
 # 30分钟重新加载一次本配置
 reload_interval = 30
-# js资源
+# js脚本获取数据
 [resource.jsForExample]
 type = 'js'
 url = 'https://gist.githubusercontent.com/keeper402/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/raw/test.js'
@@ -14,6 +14,7 @@ method = 'GET'
 body = '' # 使用post填body
 result = '$[0].low' # 使用jsonPath取对象。
 
+#webhook通知方式 钉钉机器人
 [notify.dingbot]
 type = 'webhook'
 url = 'https://oapi.dingtalk.com/robot/send?access_token=733xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe3f7'
@@ -21,12 +22,13 @@ method = 'post'
 headers = '{"content-type":"application/json;charset=utf-8"}'
 body = '{"msgtype":"text","text":{"content":"通知：${msg}"}}'
 
+# 规则， 资源+条件+定时=>通知
 # 检查癌股是不是又3000点以下了
 [rule.checkASharesBelow3000]
 interval = 1 # 每间隔1分钟执行一次检查
 corn = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
 condition = "${ASharesPrice} < 3000 && !${jsForExample}"
-muteAfterHit = 300 #命中不再检查5小时/重载配置失效
+muteAfterNotify = 300 #命中不再检查5小时/重载配置失效
 notify = 'dingbot'
 msg = '测试发送：${ASharesPrice}'
 
@@ -36,4 +38,3 @@ corn = '0 0 10,14,16 ? * MON-FRI '
 condition = "true"
 notify = 'dingbot'
 msg = '放下工作情节，尊重喝水命运'
-
