@@ -1,0 +1,39 @@
+# 30分钟重新加载一次本配置
+reload_interval = 30
+# js资源
+[resource.jsForExample]
+type = 'js'
+url = 'https://gist.githubusercontent.com/keeper402/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/raw/test.js'
+
+# 这个接口是按日的，只能获取到前一天的数据。仅作示例
+[resource.ASharesPrice]
+type = 'rest'
+url = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000001&scale=240&ma=5&datalen=1'
+method = 'GET'
+#headers = '' # 没有header就不要设置，设置空字符串会报错
+body = '' # 使用post填body
+result = '$[0].low' # 使用jsonPath取对象。
+
+[notify.dingbot]
+type = 'webhook'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=733xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe3f7'
+method = 'post'
+headers = '{"content-type":"application/json;charset=utf-8"}'
+body = '{"msgtype":"text","text":{"content":"通知：${msg}"}}'
+
+# 检查癌股是不是又3000点以下了
+[rule.checkASharesBelow3000]
+interval = 1 # 每间隔1分钟执行一次检查
+corn = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
+condition = "${ASharesPrice} < 3000 && !${jsForExample}"
+muteAfterHit = 300 #命中不再检查5小时/重载配置失效
+notify = 'dingbot'
+msg = '测试发送：${ASharesPrice}'
+
+# 工作日10,14,16点叫自己喝水
+[rule.drinkWater]
+corn = '0 0 10,14,16 ? * MON-FRI '
+condition = "true"
+notify = 'dingbot'
+msg = '放下工作情节，尊重喝水命运'
+

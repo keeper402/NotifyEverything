@@ -1,7 +1,7 @@
 const notify = require("./notify");
-const Const = require('../config/const');
-const jsonpath = require('jsonpath');
-const {rest, getResourceConfig, getResourceCall} = require("./resource");
+const Const = require("../config/const");
+const schedule = require("node-schedule");
+const {getResourceConfig, getResourceCall} = require("./resource");
 const {replaceVariables} = require("../utils/strings");
 
 let rules = new Map();
@@ -9,8 +9,10 @@ let defaultInterval = 30;
 
 let initialized = false;
 
+const lastNotify = new Map();
+
 function addRule(ruleName, ruleConfig) {
-    //找到资源名
+    //check valid
     if (ruleConfig.condition === undefined) {
         return;
     }
@@ -20,7 +22,7 @@ function addRule(ruleName, ruleConfig) {
     while ((match = regex.exec(ruleConfig.condition)) !== null) {
         resourceNames.push(match[1]);
     }
-    //map 资源名 => 资源function
+    //map resourceName => getResource function
     let getResourceMap = new Map();
     for (let resourceName of resourceNames) {
         const resourceConfig = getResourceConfig(resourceName);
@@ -29,22 +31,40 @@ function addRule(ruleName, ruleConfig) {
             getResourceMap.set(resourceName, resourceCall);
         }
     }
+    // Closure for checkAndNotify
     const checkConditionAndNotify = async function () {
-        let map = new Map();
+        let resourceValues = new Map();
         for (let key of getResourceMap.keys()) {
             const resource = await getResourceMap.get(key)();
-            map.set(key, resource);
+            resourceValues.set(key, resource);
         }
-        let condition = replaceVariables(ruleConfig.condition, map);
-        let msg = replaceVariables(ruleConfig.msg, map);
+        // replace resource var
+        let condition = replaceVariables(ruleConfig.condition, resourceValues);
+        let msg = replaceVariables(ruleConfig.msg, resourceValues);
+        // check condition
         if (eval(condition) === true) {
             const notifyConfig = notify.getNotifyConfig(ruleConfig.notify)
+            const lastTime = lastNotify.get(ruleName);
+            // check muteAfterNotify
+            if (lastTime !== undefined && lastTime - Date.now() < ruleConfig.muteAfterNotify * Const.TIME_UNIT) {
+                console.log(`now: ${new Date()}, rule: ${ruleName} in mute period. Notify will be sent after ${new Date(lastTime + ruleConfig.muteAfterNotify * Const.TIME_UNIT)}`);
+                return;
+            }
+            // do notify
             await notify.notify(notifyConfig, msg);
+            lastNotify.put(ruleName, Date.now());
         }
     };
-    const interval = ruleConfig.interval || defaultInterval;
-    const intervalRule = setInterval(checkConditionAndNotify, Const.TIME_UNIT * interval);
-    rules.set(ruleName, intervalRule);
+    if (ruleConfig.corn !== undefined) {
+        const scheduleJob = schedule.scheduleJob(ruleConfig.corn, checkConditionAndNotify);
+        rules.set(ruleConfig, scheduleJob);
+    } else if (ruleConfig.interval > 0){
+        const interval = ruleConfig.interval || defaultInterval;
+        const intervalRule = setInterval(checkConditionAndNotify, Const.TIME_UNIT * interval);
+        rules.set(ruleConfig, intervalRule);
+    } else {
+        throw 'invalid config: no interval and corn argument';
+    }
 }
 
 function init() {
@@ -55,20 +75,24 @@ function init() {
     initialized = true;
 }
 
-function reload(config){
+function reload(config) {
     clearAllRule();
     loadConfig(config);
 }
 
-function loadConfig(){
+function loadConfig() {
     for (const key of Object.keys(config.rule)) {
         addRule(key, config.rule[key]);
     }
 }
 
 function clearAllRule() {
-    rules.forEach((name, intervalRule) => {
-        clearInterval(intervalRule);
+    rules.forEach((config, job) => {
+        if (config.corn !== undefined) {
+            job.cancel();
+        } else {
+            clearInterval(job);
+        }
     })
 }
 

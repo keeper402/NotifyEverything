@@ -17,7 +17,7 @@ init();
 // app.use(cors());
 
 function init() {
-    config.init().then();
+    config.init().then(ignore => {});
 }
 
 // router(app);

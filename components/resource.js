@@ -1,5 +1,6 @@
 const request = require('../utils/request');
 const jsonpath = require('jsonpath');
+const {evaluate} = require("../utils/evaluate");
 
 function getResourceConfig(name) {
     try {
@@ -14,6 +15,10 @@ function getResourceCall(resourceConfig) {
         return () => {
             return rest(resourceConfig);
         }
+    } else if (resourceConfig.type === 'js') {
+        return () => {
+            return jsScript(resourceConfig);
+        }
     }
     return undefined;
 }
@@ -25,4 +30,9 @@ async function rest(restConfig) {
     return result;
 }
 
-module.exports = {rest, getResourceConfig, getResourceCall}
+async function jsScript(jsConfig) {
+    const data = await request.handleHttpRequest(jsConfig.url, 'GET', '');
+    return await evaluate(data);
+}
+
+module.exports = {getResourceConfig, getResourceCall}

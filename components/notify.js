@@ -1,5 +1,5 @@
 const {handleHttpRequest} = require("../utils/request");
-const {replaceVariables, replaceVariable} = require("../utils/strings");
+const {replaceVariable} = require("../utils/strings");
 const jsonpath = require("jsonpath");
 
 

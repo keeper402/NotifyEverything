@@ -1,4 +1,3 @@
-
 const axios = require('axios')
 
 function doHttpRequest(url, method, body, headers) {
@@ -39,12 +38,12 @@ async function handleHttpRequest(url, method, body, headers) {
     }
 }
 
-function get(url, headers) {
-    return handleHttpRequest(url, 'GET', '', headers);
+async function get(url, headers) {
+    return await handleHttpRequest(url, 'GET', '', headers);
 }
 
-function post(url, body, headers) {
-    return handleHttpRequest(url, 'POST', body, headers);
+async function post(url, body, headers) {
+    return await handleHttpRequest(url, 'POST', body, headers);
 }
 
 module.exports = {
