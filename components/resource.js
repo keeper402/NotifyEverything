@@ -13,33 +13,33 @@ function getResourceConfig(name) {
     }
 }
 
-function getResourceCall(resourceConfig, ruleContext) {
+function getResourceCall(resourceConfig, context) {
     if (resourceConfig.type === 'rest') {
         return () => {
-            return handleFunctionError(() => rest(resourceConfig));
+            return handleFunctionError(() => rest(resourceConfig, context));
         }
     } else if (resourceConfig.type === 'js') {
         return () => {
-            return handleFunctionError(() => jsScript(resourceConfig, ruleContext));
+            return handleFunctionError(() => jsScript(resourceConfig, context));
         }
     }
     return undefined;
 }
 
-async function rest(restConfig) {
+async function rest(restConfig, context) {
     const data = await request.handleHttpRequest(restConfig.url, restConfig.method, restConfig.body, restConfig.headers);
     const result = jsonpath.query(data, restConfig.result);
     logger.info(result);
     return result;
 }
 
-async function jsScript(jsConfig, ruleContext) {
+async function jsScript(jsConfig, context) {
     let param = null;
     if (!lodash.isEmpty(jsConfig.param)) {
         param = JSON.parse(jsConfig.param);
     }
     const script = await request.handleHttpRequest(jsConfig.url, 'GET', '');
-    return await evaluate(script, param, ruleContext);
+    return await evaluate(script, param, context);
 }
 
 module.exports = {getResourceConfig, getResourceCall}

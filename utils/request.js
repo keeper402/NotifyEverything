@@ -13,12 +13,11 @@ function doHttpRequest(url, method, body, headers) {
             data: body
         })
             .then(res => {
-                logger.info(`状态码: ${res.status}, res: ${res}`);
+                logger.info(`状态码: ${res.status}, data: ${JSON.stringify(res.data)}`);
                 resolve(res);
             })
             .catch(error => {
                 logger.error(error);
-                reject(error);
             })
 
     });
@@ -26,6 +25,9 @@ function doHttpRequest(url, method, body, headers) {
 
 async function handleHttpRequest(url, method, body, headers) {
     const response = await doHttpRequest(url, method, body, headers);
+    if (response === undefined) {
+        return undefined;
+    }
     if (response.status !== 200) {
         logger.error(`response returned status ${response.status} and body: ${JSON.stringify(response)}`);
     }

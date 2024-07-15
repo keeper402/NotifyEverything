@@ -4,9 +4,10 @@ const logger = require("./logger");
 
 function handleFunctionError(f) {
     try {
-        f();
+        return f();
     } catch (e) {
         handleError(e);
+        return undefined;
     }
 }
 

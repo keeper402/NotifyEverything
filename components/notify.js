@@ -2,9 +2,10 @@ const {handleHttpRequest} = require("../utils/request");
 const {replaceVariable} = require("../utils/strings");
 const jsonpath = require("jsonpath");
 const logger = require("../utils/logger");
+const {sendMail} = require("../support/mailer");
 
 
-async function webhook(notifyConfig, msg) {
+async function webhook(notifyConfig, msg, context) {
     let url = replaceVariable(notifyConfig.url, 'msg', msg);
     if (notifyConfig.body === undefined) {
         notifyConfig.body = '';
@@ -14,9 +15,20 @@ async function webhook(notifyConfig, msg) {
     logger.info(response);
 }
 
+async function mail(mailConfig, msg, context) {
+    if (mailConfig.body === undefined) {
+        mailConfig.body = '';
+    }
+    const subject = eval('`'+ mailConfig.title + '`')
+    const text = eval('`'+ mailConfig.text + '`')
+    await sendMail(mailConfig, subject, text);
+}
+
 async function notify(notifyConfig, msg, context) {
     if (notifyConfig.type === "webhook") {
-        await webhook(notifyConfig, msg);
+        await webhook(notifyConfig, msg, context);
+    } else if (notifyConfig.type === "mail") {
+        await mail(notifyConfig, msg, context);
     }
 }
 
