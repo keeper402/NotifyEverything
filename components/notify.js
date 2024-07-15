@@ -16,9 +16,6 @@ async function webhook(notifyConfig, msg, context) {
 }
 
 async function mail(mailConfig, msg, context) {
-    if (mailConfig.body === undefined) {
-        mailConfig.body = '';
-    }
     const subject = eval('`'+ mailConfig.title + '`')
     const text = eval('`'+ mailConfig.text + '`')
     await sendMail(mailConfig, subject, text);

@@ -1,44 +1,64 @@
 # 30分钟重新加载一次本配置
 reloadInterval = 30
 
-#默认异常内容
+#默认异常内容提醒
 errorNotify='dingbot'
 #异常消息
 errorNotifyMsg='error: ${e.toString()}, errorMsg: ${errMsg}'
 # js脚本获取数据
 [resource.jsForExample]
 type = 'js'
-url = 'https://gist.githubusercontent.com/keeper402/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/raw/test.js'
+param='{"authKey":"xxxxxxxxxx", "name":"xxxAuth"}' # 如果参数写脚本里了就可以不写这个参数。必须json格式，最外面单引号，里面内容用双引号（key必须用引号）。
+url='https://pastebin.com/raw/UL6ZCBGM' # 示例代码（建议打开看看）。可以取context上下文和自定义param。使用logger.info('自定义信息')来确认脚本被执行了。
+#url = 'https://gist.githubusercontent.com/keeper402/******************************************/raw/test.js'
 # rest接口获取数据
 [resource.ASharesPrice]
 type = 'rest'
 # 这个接口是按日的，只能获取到前一天的数据。仅作示例
 url = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000001&scale=240&ma=5&datalen=1'
 method = 'GET'
-headers = '' # 没有header就不要设置，设置空字符串会报错
+#headers = '' # 没有header就不要设置，设置空字符串会报错
 body = '' # 使用post填body
 result = '$[0].low' # 使用jsonPath取对象。
 
 #webhook通知方式 钉钉机器人
 [notify.dingbot]
 type = 'webhook'
-url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=******************************************'
 method = 'post'
 headers = '{"content-type":"application/json;charset=utf-8"}'
 body = '{"msgtype":"text","text":{"content":"通知：${msg}"}}'
 
-#[notify.qqMail]
-#type='mail'
-#from=''
-#to=''
-#pass=''
+# qq邮箱在设置-账户 里可以开一个smtp密码，填到pass里就可以用
+[notify.qqMail]
+type='mail'
+from='*****@qq.com'
+to='*****@qq.com'
+pass='*************'
+title='规则：${context.ruleName} 发出通知'
+text='通知内容：${msg}'
 
 # 规则， 资源+条件+定时=>通知
 # 检查癌股是不是又3000点以下了
 [rule.checkASharesBelow3000]
 interval = 1 # 每间隔1分钟执行一次检查
-#cron = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
-condition = "${ASharesPrice} < 3000 && !${jsForExample}"
+cron = '0 0 15 * * MON-FRI' # 如果有corn优先按corn计划任务
+#cron = '0/10 * * * * MON-FRI' # 如果有corn优先按corn计划任务
+condition = "${ASharesPrice} < 3000 && ${jsForExample}"
 muteAfterNotify = 300 #命中不再检查5小时/重载配置以后取消mute
-notify = 'dingbot'
+notify = 'qqMail'
 msg = '测试发送：${ASharesPrice}'
+
+# 工作日10,14,16点叫自己喝水
+[rule.drinkWater]
+cron = '0 0 10,14,16 ? * MON-FRI '
+condition = "true"
+notify = 'dingbot'
+msg = '放下工作情节，尊重喝水命运'
+
+# 工作日10.30,14.30,16.30点叫自己喝水
+[rule.drinkWater2]
+cron = '0 30 10,14,16 ? * MON-FRI '
+condition = "true"
+notify = 'dingbot'
+msg = '放下工作情节，尊重喝水命运'
