@@ -73,7 +73,7 @@ function addRule(ruleName, ruleConfig) {
                 const now = Date.now();
                 context.lastNotify = now;
                 context.notifyTimes++;
-                lastNotify.put(ruleName, now);
+                lastNotify.set(ruleName, now);
             }
         } catch (e) {
             context.errorTimes++;

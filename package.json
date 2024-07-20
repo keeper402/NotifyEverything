@@ -7,32 +7,28 @@
   "scripts": {
     "start": "better-npm-run build:dev",
     "build:stage": "better-npm-run build:stage",
-    "build:prod": "better-npm-run build:prod",
-    "doc": "apidoc -i components/"
+    "build:prod": "better-npm-run build:prod"
   },
   "betterScripts": {
     "build:dev": {
       "command": "node server.js",
       "env": {
         "mode": "dev",
-        "port": 3000,
-        "secret": "sdklfui4ew6r347y34b"
+        "port": 3000
       }
     },
     "build:stage": {
       "command": "./start-server.sh",
       "env": {
         "mode": "stage",
-        "port": 4001,
-        "secret": "sdklfui4ew6r347y34b"
+        "port": 4001
       }
     },
     "build:prod": {
       "command": "sudo pm2 start server.js",
       "env": {
         "mode": "prod",
-        "port": 80,
-        "secret": "dfsdmf348y345h34"
+        "port": 80
       }
     }
   },
