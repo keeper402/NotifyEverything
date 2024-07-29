@@ -71,6 +71,7 @@ export default {
   box-sizing: border-box; /* 确保padding不影响宽高 */
   overflow: hidden; /* 不显示外部滚动条 */
   flex-grow: 1; /* 允许编辑器容器扩展以占满剩余空间 */
+  border-radius: 10px;
 }
 
 /* 响应式样式 */
