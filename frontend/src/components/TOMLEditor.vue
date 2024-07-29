@@ -1,7 +1,5 @@
 <template>
-  <div class="parent">
     <div id="editor" class="code-editor"></div>
-  </div>
 </template>
 
 <script>
@@ -64,24 +62,15 @@ export default {
 </script>
 
 <style>
-.parent {
-  display: flex;
-  justify-content: center; /* 水平居中 */
-  align-items: flex-start; /* 垂直顶部对齐 */
-  box-sizing: border-box; /* 确保padding不影响宽高 */
-  height: auto; /* 使容器填满整个视口 */
-  min-height: 100%;
-  width: 100%; /* 确保容器宽度为100% */
-}
 
 .code-editor {
   width: 1000px; /* 默认宽度 */
-  height: auto; /* 高度自动调整 */
-  max-width: calc(100% - 40px); /* 保留边距 */
+  height: 100%; /* 高度自动调整 */
   min-height: 1000px; /* 最小高度 */
   padding: 0; /* 盒子内部边距 */
   box-sizing: border-box; /* 确保padding不影响宽高 */
   overflow: hidden; /* 不显示外部滚动条 */
+  flex-grow: 1; /* 允许编辑器容器扩展以占满剩余空间 */
 }
 
 /* 响应式样式 */
