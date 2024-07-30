@@ -6,10 +6,9 @@ enum MSG {
     '密码错误' = 500,
 }
 
-const API_KEY = 'ea26aabca1894b18a91e10721c3a1d1f';
 
 const $post = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: '/api',
     method: 'post',
     timeout: 5000,
     headers:{

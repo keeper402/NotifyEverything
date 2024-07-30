@@ -1,8 +1,8 @@
 import $post from "@/api/http";
 
 export interface LoginReq {
-    account: string;
-    password: string;
+    data: string;
+    signature: string;
 }
 
-export const checkPass = (data: LoginReq) => $post({url:"/checkPass", data:data});
+export const login = (data: LoginReq) => $post({url:"/login", data:data});

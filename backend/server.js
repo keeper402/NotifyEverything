@@ -1,27 +1,31 @@
 const express = require('express');
 const expressValidator = require('express-validator');
 const bodyParser = require('body-parser');
-const cors = require('cors');
+const cookieParser = require('cookie-parser');
+// const cors = require('cors');
 const config = require("./config/configuration");
 const logger = require("./utils/logger");
 
 // const db = require('./config/db');
 // db.sync();
-// const router = require('./config/router');
+const router = require('./config/router');
+const {authValidator} = require("./components/api/auth/auth.service");
 const app = express();
 init();
 
 // app.use('/doc', express.static('./doc'));
-// app.use(expressValidator());
-// app.use(bodyParser.urlencoded({extended: false}));
-// app.use(bodyParser.json());
+app.use(expressValidator());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 // app.use(cors());
+app.use(cookieParser());
+app.use(authValidator);
 
 function init() {
     config.init().then(ignore => {});
 }
 
-// router(app);
+router(app);
 const port = process.env.port || 3000;
 app.listen(port, () => console.log(`Run on port ${port}`));
 

@@ -6,7 +6,7 @@ interface LoginForm {
 }
 
 export class InitLoginData {
-    checkData: LoginForm = {
+    loginForm: LoginForm = {
         password: '',
     };
     loginFormRef = ref<FormInstance>();

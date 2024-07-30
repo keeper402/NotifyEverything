@@ -4,7 +4,7 @@
       <el-form
           ref="loginFormRef"
           style="max-width: 600px"
-          :model="checkData"
+          :model="loginForm"
           status-icon
           :rules="rules"
           label-width="auto"
@@ -12,13 +12,13 @@
       >
         <el-form-item label="密码" prop="password">
           <el-input
-              v-model="checkData.password"
+              v-model="loginForm.password"
               type="password"
               autocomplete="off"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="sub-bth" @click="submitForm()">
+          <el-button type="primary" class="sub-bth" @click="submit()">
             登陆
           </el-button>
         </el-form-item>
@@ -31,6 +31,8 @@
 import {defineComponent, reactive, toRefs} from 'vue'
 import {useRouter} from 'vue-router';
 import {InitLoginData} from "../types/login";
+import {login} from "@/api/api";
+import {generateRandomString, generateRSAKeyPairFromMasterKey, signWithPrivateKey} from "@/utils/encrypt";
 
 export default defineComponent({
   setup() {
@@ -45,22 +47,33 @@ export default defineComponent({
       ],
     }
     let router = useRouter();
-    const submitForm = () => {
+
+    const submit = () => {
       data.loginFormRef?.validate((isValid) => {
             if (isValid) {
-              // login(data.loginForm).then((response) => {
-              //   console.log(response);
-              //   localStorage.setItem('loginRes', response.data)
-              //   router.push('/');
-              // });
+              doLogin(data.loginForm.password);
               alert('验证通过')
             }
           }
       );
     }
 
+    function doLogin(password: string): void {
+      const pair = generateRSAKeyPairFromMasterKey(password);
+      const info = {
+        time: Date.now(),
+        rnd: generateRandomString(16)
+      };
+      const stringify = JSON.stringify(info);
+      const signature = signWithPrivateKey(pair.privateKey, stringify);
+      login({signature: signature, data: stringify}).then((response) => {
+        console.log(response);
+        localStorage.setItem('loginRes', response.data)
+        router.push('/');
+      });
+    }
 
-    return {...toRefs(data), rules, submitForm}
+    return {...toRefs(data), rules, submit: submit}
   }
 })
 </script>

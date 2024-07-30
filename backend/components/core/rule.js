@@ -1,11 +1,11 @@
 const notify = require("./notify");
-const Const = require("../config/const");
+const Const = require("../../config/const");
 const schedule = require("node-schedule");
 const {getResourceConfig, getResourceCall} = require("./resource");
-const {replaceVariables} = require("../utils/strings");
-const compareConfig = require("../support/compare");
-const {handleError} = require("../utils/error.handle");
-const logger = require("../utils/logger");
+const {replaceVariables} = require("../../utils/strings");
+const compareConfig = require("../../support/compare");
+const {handleError} = require("../../utils/error.handle");
+const logger = require("../../utils/logger");
 
 let ruleJobs = new Map();
 let rules = new Map();
