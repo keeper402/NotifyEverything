@@ -5,7 +5,7 @@ const DEFAULT_RELOAD_INTERVAL = require("node:fs");
 require("dotenv").config()
 require('./const')
 const request = require('../utils/request')
-const rule = require('../components/rule')
+const rule = require('../components/core/rule')
 const util = require('util');
 const logger = require("../utils/logger");
 

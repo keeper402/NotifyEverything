@@ -1,28 +1,28 @@
 <template>
   <div class="login-box">
-      <h1><img class="logo-box" src="../assets/LOGO_BIG.png" alt=""></h1>
-      <el-form
-          ref="loginFormRef"
-          style="max-width: 600px"
-          :model="loginForm"
-          status-icon
-          :rules="rules"
-          label-width="auto"
-          class="loginForm"
-      >
-        <el-form-item label="密码" prop="password">
-          <el-input
-              v-model="loginForm.password"
-              type="password"
-              autocomplete="off"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" class="sub-bth" @click="submit()">
-            登陆
-          </el-button>
-        </el-form-item>
-      </el-form>
+    <h1><img class="logo-box" src="../assets/LOGO_BIG.png" alt=""></h1>
+    <el-form
+        ref="loginFormRef"
+        style="max-width: 600px"
+        :model="loginForm"
+        status-icon
+        :rules="rules"
+        label-width="auto"
+        class="loginForm"
+    >
+      <el-form-item label="密码" prop="password">
+        <el-input
+            v-model="loginForm.password"
+            type="password"
+            autocomplete="off"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" class="sub-bth" @click="submit()">
+          登陆
+        </el-button>
+      </el-form-item>
+    </el-form>
 
   </div>
 </template>
@@ -33,6 +33,7 @@ import {useRouter} from 'vue-router';
 import {InitLoginData} from "../types/login";
 import {login} from "@/api/api";
 import {generateRandomString, generateRSAKeyPairFromMasterKey, signWithPrivateKey} from "@/utils/encrypt";
+import {ElMessage} from "element-plus";
 
 export default defineComponent({
   setup() {
@@ -52,25 +53,30 @@ export default defineComponent({
       data.loginFormRef?.validate((isValid) => {
             if (isValid) {
               doLogin(data.loginForm.password);
-              alert('验证通过')
             }
           }
       );
     }
 
     function doLogin(password: string): void {
-      const pair = generateRSAKeyPairFromMasterKey(password);
-      const info = {
-        time: Date.now(),
-        rnd: generateRandomString(16)
-      };
-      const stringify = JSON.stringify(info);
-      const signature = signWithPrivateKey(pair.privateKey, stringify);
-      login({signature: signature, data: stringify}).then((response) => {
-        console.log(response);
-        localStorage.setItem('loginRes', response.data)
-        router.push('/');
-      });
+      try {
+        const pair = generateRSAKeyPairFromMasterKey(password);
+        const info = {
+          time: Date.now(),
+          rnd: generateRandomString(16)
+        };
+        const stringify = JSON.stringify(info);
+        const signature = signWithPrivateKey(pair.privateKey, stringify);
+        login({signature: signature, data: stringify}).then((response) => {
+          console.log(response);
+          if (response.data.success) {
+            localStorage.setItem('loginRes', JSON.stringify(response.data));
+            router.push('/');
+          }
+        });
+      } catch (error) {
+        ElMessage.error('未知异常')
+      }
     }
 
     return {...toRefs(data), rules, submit: submit}

@@ -10,3 +10,4 @@ config.toml
 package-lock.json
 /frontend/yarn.lock
 /yarn.lock
+.vercel

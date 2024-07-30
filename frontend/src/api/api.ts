@@ -5,4 +5,9 @@ export interface LoginReq {
     signature: string;
 }
 
-export const login = (data: LoginReq) => $post({url:"/login", data:data});
+
+export interface LoginRes {
+    token: string;
+}
+
+export const login  = (data: LoginReq) => $post({url:"/login", data:data});

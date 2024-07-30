@@ -1,12 +1,12 @@
-import encrypt, {generateRandomString} from "../../../utils/encrypt";
-import logger from "../../../utils/logger";
-import KvStore from "../../../support/kv";
+const encrypt = require("../../../utils/encrypt");
+const logger = require("../../../utils/logger");
+const KvStore = require("../../../support/kv");
 
 class AuthService {
 
     static async login(body) {
         if (await this.verifyAuth(body)) {
-            const token = generateRandomString(64);
+            const token = encrypt.generateRandomString(64);
             await KvStore.set('token', token);
             return token;
         }
@@ -15,13 +15,14 @@ class AuthService {
 
     static async verifyAuth(body) {
         try {
+            console.log(body);
             const object = JSON.parse(body.data);
             if (!this.checkAuthData(object)) {
                 return false;
             }
-            return encrypt.verifyWithPublicKey(this.getPassword(), body.data, body.signature);
+            return encrypt.verifyWithPublicKey(await this.getPassword(), body.data, body.signature);
         } catch (e) {
-            logger.error('checkPass error', e)
+            logger.error('verifyAuth error', e)
         }
         return false;
     }
@@ -34,11 +35,13 @@ class AuthService {
         return await this.getPassword() !== encrypt.DEFAULT_PASSWORD;
     }
 
-    private static checkAuthData(object) {
+    static checkAuthData(object) {
         if (object) {
             if (object.time) {
                 //一分钟内的请求
-                if (Date.now() - object.time < 1000 * 60) {
+                const requestIn = Date.now() - object.time;
+                console.log(`requestIn: ${requestIn}, rnd: ${object.rnd}`);
+                if (object.rnd && requestIn < 1000 * 60) {
                     return true;
                 }
             }
@@ -50,6 +53,10 @@ class AuthService {
 }
 
 const authValidator = async (req, res, next) => {
+    if (req.url === '/login') {
+        next();
+        return;
+    }
     const token = req.cookies.token;
     if (token === undefined || token === null) {
         return res.status(401).send({

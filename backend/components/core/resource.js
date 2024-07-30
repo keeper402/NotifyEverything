@@ -1,9 +1,9 @@
-const request = require('../utils/request');
+const request = require('../../utils/request');
 const jsonpath = require('jsonpath');
-const {evaluate} = require("../utils/evaluate");
-const logger = require("../utils/logger");
+const {evaluate} = require("../../utils/evaluate");
+const logger = require("../../utils/logger");
 const lodash = require('lodash');
-const {handleFunctionError} = require("../utils/error.handle");
+const {handleFunctionError} = require("../../utils/error.handle");
 
 function getResourceConfig(name) {
     try {

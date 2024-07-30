@@ -1,8 +1,8 @@
-const {handleHttpRequest} = require("../utils/request");
-const {replaceVariable} = require("../utils/strings");
+const {handleHttpRequest} = require("../../utils/request");
+const {replaceVariable} = require("../../utils/strings");
 const jsonpath = require("jsonpath");
-const logger = require("../utils/logger");
-const {sendMail} = require("../support/mailer");
+const logger = require("../../utils/logger");
+const {sendMail} = require("../../support/mailer");
 
 
 async function webhook(notifyConfig, msg, context) {

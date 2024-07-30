@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 import {ElMessage} from "element-plus";
 
 enum MSG {
@@ -6,8 +6,15 @@ enum MSG {
     '密码错误' = 500,
 }
 
+export interface ApiResponse<T> {
+    success: boolean;
+    code: number;
+    message: string;
+    data?: T; // 可选字段，表示数据部分
+}
 
-const $post = axios.create({
+
+const $post= axios.create({
     baseURL: '/api',
     method: 'post',
     timeout: 5000,
@@ -26,10 +33,10 @@ const $post = axios.create({
 
  $post.interceptors.response.use(resp => {
      if (resp.data.success !== true) {
-         ElMessage.error(resp.data.msg)
-         return Promise.reject(resp.data);
+         ElMessage.error(resp.data.message)
+         return resp;
      }
-     return resp.data;
+     return resp;
  }, error => {
      return Promise.reject(error);
  })

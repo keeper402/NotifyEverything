@@ -10,7 +10,6 @@
   "dependencies": {
     "@babel/core": "^7.24.9",
     "@babel/plugin-transform-class-static-block": "^7.24.7",
-    "@highlightjs/vue-plugin": "^2.1.0",
     "axios": "^1.7.2",
     "core-js": "^3.8.3",
     "crypto-browserify": "^3.12.0",

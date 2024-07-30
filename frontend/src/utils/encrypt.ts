@@ -1,7 +1,7 @@
 import * as forge from 'node-forge';
-import { createHash } from 'crypto';
+
 // const forge = require('node-forge');
-// const {createHash} = require('crypto');
+
 
 /**
  * 使用主密钥生成 RSA 公钥和私钥
@@ -10,7 +10,9 @@ import { createHash } from 'crypto';
  */
 export function generateRSAKeyPairFromMasterKey(masterKey: string): { publicKey: string, privateKey: string } {
     // 使用主密钥生成一个种子
-    const seed = createHash('sha256').update(masterKey).digest('hex');
+    const md = forge.md.sha256.create();
+    md.update(masterKey);
+    const seed = md.digest().toHex();
 
     // 创建一个随机数生成器并使用种子初始化
     const prng = forge.random.createInstance();
@@ -67,7 +69,7 @@ export function verifyWithPublicKey(publicKeyPem: string, data: string, signatur
 
 
 export function generateRandomString(length: number): string {
-    if(length % 2 !== 0) {
+    if (length % 2 !== 0) {
         throw new Error("The length must be an even number.");
     }
     const bytes = forge.random.getBytesSync(length / 2);
@@ -75,34 +77,37 @@ export function generateRandomString(length: number): string {
     return forge.util.bytesToHex(bytes);
 }
 
+function test() {
+    // 使用示例
+    const masterKey = '123123';
+    const t1 = Date.now();
+    const {publicKey, privateKey} = generateRSAKeyPairFromMasterKey(masterKey);
+    const t2 = Date.now();
+    console.log(`time generateRSAKeyPairFromMasterKey ${t2 - t1}ms`);
 
-// 使用示例
-const masterKey = '123123';
-const t1 = Date.now();
-const { publicKey, privateKey } = generateRSAKeyPairFromMasterKey(masterKey);
-const t2 = Date.now();
-console.log(`time generateRSAKeyPairFromMasterKey ${t2 - t1}ms`);
+    console.log('Public Key:', publicKey);
+    console.log('Private Key:', privateKey);
 
-console.log('Public Key:', publicKey);
-console.log('Private Key:', privateKey);
+    const t3 = Date.now();
+    const signText = signWithPrivateKey(privateKey, 'test');
+    const t4 = Date.now();
+    console.log(`time signWithPrivateKey ${t4 - t3}ms`);
+    console.log('encrypt test:', signText);
+    const t5 = Date.now();
+    console.log('decrypt test:', verifyWithPublicKey(publicKey, 'test', signText));
+    const t6 = Date.now();
+    console.log(`time verifyWithPublicKey ${t6 - t5}ms`);
 
-const t3 = Date.now();
-const signText = signWithPrivateKey(privateKey, 'test');
-const t4 = Date.now();
-console.log(`time signWithPrivateKey ${t4 - t3}ms`);
-console.log('encrypt test:', signText);
-const t5 = Date.now();
-console.log('decrypt test:', verifyWithPublicKey(publicKey, 'test', signText));
-const t6 = Date.now();
-console.log(`time verifyWithPublicKey ${t6 - t5}ms`);
+    const t7 = Date.now();
+    const encrypt = encryptWithPublicKey(publicKey, 'test123');
+    const t8 = Date.now();
+    console.log(`time encryptWithPublicKey ${t8 - t7}ms`);
+    console.log('encrypt:', encrypt);
+    const t9 = Date.now();
+    const decrypt = decryptWithPrivateKey(privateKey, encrypt);
+    const t10 = Date.now();
+    console.log(`time decryptWithPrivateKey ${t10 - t9}ms`);
+    console.log('decrypt:', decrypt);
+}
 
-const t7 = Date.now();
-const encrypt = encryptWithPublicKey(publicKey, 'test123');
-const t8 = Date.now();
-console.log(`time encryptWithPublicKey ${t8 - t7}ms`);
-console.log('encrypt:', encrypt);
-const t9 = Date.now();
-const decrypt = decryptWithPrivateKey(privateKey, encrypt);
-const t10 = Date.now();
-console.log(`time decryptWithPrivateKey ${t10 - t9}ms`);
-console.log('decrypt:', decrypt);
+// test();

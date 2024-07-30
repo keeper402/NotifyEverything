@@ -12,7 +12,7 @@ gwIDAQAB
 -----END PUBLIC KEY-----`
 
 // 公钥验签
-function verifyWithPublicKey(publicKeyPem: string, data: string, signature: string): boolean {
+function verifyWithPublicKey(publicKeyPem, data, signature) {
     const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
     const md = forge.md.sha256.create();
     md.update(data, 'utf8');
@@ -20,7 +20,7 @@ function verifyWithPublicKey(publicKeyPem: string, data: string, signature: stri
 }
 
 // 公钥加密
-function decryptWithPrivateKey(privateKeyPem: string, encryptedData: string): string {
+function decryptWithPrivateKey(privateKeyPem, encryptedData) {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
     const decrypted = privateKey.decrypt(forge.util.decode64(encryptedData));
     return forge.util.decodeUtf8(decrypted);
@@ -37,3 +37,8 @@ function generateRandomString(length) {
 
 
 module.exports = {verifyWithPublicKey, decryptWithPrivateKey, generateRandomString, DEFAULT_PASSWORD, DEFAULT_PUBLIC_KEY}
+
+//
+// const data = JSON.parse('{"signature":"t1I7K8Kq3WhcaRfcEXO2RdWQWBzlNBjCjxLPeYHzn7PKfbpWY6hznLhGfQocd0o4tGN4fChQ8vdVjaxtI87fbdBZ+4OZri6PoNtC7xkwq1Lp11SpWBEyKW+dsDHzfaKcUaI/9lQsN/cAT5E+K/uYOQLrWcAU7bab3ZyXxkaui06ZTMZn3/4RHsq50MkxSQLnJM7ajB3VrZuYrkQCwj+gUAITuAH2CP8rubkSdJozgoIwxzUqd62nC2p9dUMigN0yogpSQaNXiizlBf78ezGDycQZUtAhCXgFF64aTav2CNdia2LOx+sB25td6zlqIMs694/HjANivTSX5XiwenL8/Q==","data":"{\\"time\\":1722367231799,\\"rnd\\":\\"4ecadc61932330cf\\"}"}');
+// const b = verifyWithPublicKey(DEFAULT_PUBLIC_KEY, data.data, data.signature);
+// console.log(b);

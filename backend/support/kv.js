@@ -1,4 +1,4 @@
-import {kv} from "@vercel/kv";
+const {kv} = require("@vercel/kv");
 
 class KvStore {
 

@@ -1,4 +1,4 @@
-const {getNotifyConfig, notify} = require("../components/notify");
+const {getNotifyConfig, notify} = require("../components/core/notify");
 const {DEFAULT_ERROR_NOTIFY_MSG} = require("../config/const");
 const logger = require("./logger");
 
