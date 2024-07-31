@@ -7,7 +7,10 @@ require('./const')
 const request = require('../utils/request')
 const rule = require('../components/core/rule')
 const util = require('util');
+const _ = require('lodash');
 const logger = require("../utils/logger");
+const ConfigService = require("../components/api/config/config.service");
+
 
 config = {};
 let initialized = false;
@@ -18,18 +21,23 @@ async function reloadConfig() {
         const data = await util.promisify(fs.readFile)('./config.toml', 'utf8');
         config = toml.parse(data);
         Const.TIME_UNIT = parseInt(process.env.TIME_UNIT);
-    } else if (process.env.CONFIG_FILE !== undefined) {
-        try {
-            const data = await request.get(process.env.CONFIG_FILE);
-            config = toml.parse(data);
-        } catch (e) {
-            logger.error(e);
-        }
-    } else if (process.env.DEFAULT_CONFIG !== undefined) {
-        config = toml.parse(process.env.DEFAULT_CONFIG);
     } else {
-        let buffer = fs.readFileSync('./config.toml');
-        config = toml.parse(buffer.toString('utf-8'));
+        //按顺序读
+        if (process.env.CONFIG_FILE !== undefined) {
+            try {
+                const data = await request.get(process.env.CONFIG_FILE);
+                config = toml.parse(data);
+            } catch (e) {
+                logger.error(e);
+            }
+        } else if (process.env.DEFAULT_CONFIG !== undefined) {
+            config = toml.parse(process.env.DEFAULT_CONFIG);
+        } else {
+            const configInKv = await ConfigService.get();
+            if (!_.isEmpty(configInKv)) {
+                config = configInKv;
+            }
+        }
     }
     const json = JSON.stringify(config);
     config = JSON.parse(json);
