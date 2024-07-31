@@ -1,7 +1,7 @@
 const arrUtil = require('lodash');
 
 function compareToKeys(objectOld, objectNew) {
-    const oldKeys = objectOld !== undefined ? Object.keys(objectOld) : [];
+    const oldKeys = objectOld !== undefined ? parseKeysNoError(objectOld) : [];
     const newKeys = Object.keys(objectNew);
     const sameKeys = arrUtil.intersection(oldKeys, newKeys);
     const toUpdate = [];
@@ -27,3 +27,12 @@ function compareConfig(oldConfig, newConfig) {
 }
 
 module.exports = compareConfig
+
+function parseKeysNoError(object) {
+    try {
+        return Object.keys(object);
+    } catch (e) {
+        console.error('ignore error', e);
+    }
+    return [];
+}

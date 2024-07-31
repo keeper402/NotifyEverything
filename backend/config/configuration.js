@@ -17,36 +17,47 @@ let initialized = false;
 let needIntervalRefresh = false;
 
 async function reloadConfig() {
-    needIntervalRefresh = false;
-    const oldConfig = JSON.parse(JSON.stringify(config));
-    if (process.env.DEBUG === 'true') {
-        const data = await util.promisify(fs.readFile)('./config.toml', 'utf8');
-        config = toml.parse(data);
-        Const.TIME_UNIT = parseInt(process.env.TIME_UNIT);
-    } else {
-        //按顺序读
-        if (process.env.CONFIG_FILE !== undefined) {
-            try {
-                const data = await request.get(process.env.CONFIG_FILE);
-                config = toml.parse(data);
-                needIntervalRefresh = true;
-            } catch (e) {
-                logger.error(e);
-            }
-        } else if (process.env.DEFAULT_CONFIG !== undefined) {
-            config = toml.parse(process.env.DEFAULT_CONFIG);
+    let oldConfig = undefined;
+    let configStr = '';
+    try {
+        needIntervalRefresh = false;
+        oldConfig = JSON.parse(JSON.stringify(config));
+        if (process.env.DEBUG === 'true') {
+            configStr = await util.promisify(fs.readFile)('./config.toml', 'utf8');
+            Const.TIME_UNIT = parseInt(process.env.TIME_UNIT);
         } else {
-            const configInKv = await ConfigService.get();
-            if (!_.isEmpty(configInKv)) {
-                config = configInKv;
+            //按顺序读
+            if (process.env.CONFIG_FILE !== undefined) {
+                try {
+                    configStr = await request.get(process.env.CONFIG_FILE);
+                    needIntervalRefresh = true;
+                } catch (e) {
+                    logger.error(e);
+                }
+            } else if (process.env.DEFAULT_CONFIG !== undefined) {
+                configStr = process.env.DEFAULT_CONFIG;
+            } else {
+                const configInKv = await ConfigService.get();
+                if (!_.isEmpty(configInKv.config)) {
+                    configStr = configInKv.config;
+                }
             }
         }
+        logger.info('in start, config is: ' + configStr);
+    } catch (e) {
+        logger.error(e);
+        return Const.CONFIG_ACCESS_ERROR;
     }
-    const json = JSON.stringify(config);
-    config = JSON.parse(json);
-    logger.info('init: config: ' + json);
-    //reload rule
-    rule.reload(oldConfig, config);
+    try {
+        //reload rule
+        const json = JSON.stringify(toml.parse(configStr));
+        config = JSON.parse(json);
+        rule.reload(oldConfig, config);
+    } catch (e) {
+        logger.error(e);
+        return Const.CONFIG_INVALID;
+    }
+    return Const.OK;
 }
 
 async function init() {

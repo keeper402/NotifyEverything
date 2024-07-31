@@ -8,7 +8,9 @@ const CONFIG_KEY = 'config';
 class ConfigService {
 
     static async get() {
-        return await KvStore.get(CONFIG_KEY);
+        const config = await KvStore.get(CONFIG_KEY);
+        const configStatus = await KvStore.get('CONFIG_STATUS');
+        return {config:config, configStatus:configStatus};
     }
 
 

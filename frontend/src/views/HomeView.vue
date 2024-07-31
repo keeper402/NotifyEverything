@@ -7,7 +7,7 @@
       <div class="head-of-edit">
         <h1>Config File</h1>
         <el-button class="right" type="primary" @click="showConfig()" style="display: none">showConfig</el-button>
-        <el-button class="right" type="primary" @click="loadConfig()" style="display: none">loadConfig</el-button>
+        <el-button class="right" type="primary" @click="loadConfig(false)" style="display: none">loadConfig</el-button>
         <el-button class="right" type="primary" @click="submitConfig()">Submit</el-button>
       </div>
       <TOMLEditor :config="config" @update:config="updateConfig"/>
@@ -66,31 +66,46 @@ const updateConfig = (newConfig: string) => {
 const router = useRouter();
 
 onMounted(() => {
-  loadConfig();
+  loadConfig(false);
   const globalProperties = getCurrentInstance()?.appContext.config.globalProperties;
   globalProperties?.$registerTask(REFRESH_TOKEN_TASK_ID, tryRefreshToken);
   globalProperties?.$startInterval(); // 调用 $startInterval
 });
 
 function submitConfig() {
-  saveConfig({config:config.value}).then(res=>{
+  saveConfig({config: config.value}).then(res => {
     if (res?.data?.success) {
-      ElMessage.info('保存成功✌️');
+      ElMessage.info('保存成功✌️ 5s后检验配置...');
     } else {
       ElMessage.info('保存失败😡');
     }
   })
+
+  //5秒后刷新配置
+  setTimeout(() => loadConfig(true), 5 * 1000);
 }
 
-function loadConfig() {
+function loadConfig(showSuccess: boolean) {
   getConfig().then(res => {
     console.log(res);
     if (res?.data?.success) {
-      const configRes = res?.data?.data?.config;
-      if (!_.isEmpty(configRes)) {
-        config.value = configRes;
+      const data = res?.data?.data;
+      if (!_.isEmpty(data?.config)) {
+        config.value = data?.config;
       } else {
         config.value = '';
+      }
+      if (data?.configStatus !== 'OK') {
+        switch (data?.configStatus) {
+          case 'CONFIG_INVALID':
+            ElMessage.error('配置文件不合法，请修改👿')
+            break;
+          case 'CONFIG_ACCESS_ERROR':
+            ElMessage.error('无法获取配置文件，请检查🔍')
+            break;
+        }
+      } else if (showSuccess) {
+        ElMessage.info('配置文件已加载🙆‍♂️')
       }
     }
   });
