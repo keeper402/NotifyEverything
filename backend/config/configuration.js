@@ -1,7 +1,6 @@
 const toml = require('toml');
 const Const = require('../config/const');
 const fs = require("node:fs");
-const DEFAULT_RELOAD_INTERVAL = require("node:fs");
 require("dotenv").config()
 require('./const')
 const request = require('../utils/request')
@@ -15,7 +14,10 @@ const ConfigService = require("../components/api/config/config.service");
 config = {};
 let initialized = false;
 
+let needIntervalRefresh = false;
+
 async function reloadConfig() {
+    needIntervalRefresh = false;
     const oldConfig = JSON.parse(JSON.stringify(config));
     if (process.env.DEBUG === 'true') {
         const data = await util.promisify(fs.readFile)('./config.toml', 'utf8');
@@ -27,6 +29,7 @@ async function reloadConfig() {
             try {
                 const data = await request.get(process.env.CONFIG_FILE);
                 config = toml.parse(data);
+                needIntervalRefresh = true;
             } catch (e) {
                 logger.error(e);
             }
@@ -51,11 +54,13 @@ async function init() {
         return;
     }
     await reloadConfig();
-    const interval = config.reloadInterval || Const.DEFAULT_RELOAD_INTERVAL;
-    setInterval(reloadConfig, Const.TIME_UNIT * interval);
+    if (needIntervalRefresh) {
+        const interval = config.reloadInterval || Const.DEFAULT_RELOAD_INTERVAL;
+        setInterval(reloadConfig, Const.TIME_UNIT * interval);
+    }
     initialized = true;
 }
 
 module.exports = {
-    init
+    init, reloadConfig
 }
