@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {ElMessage} from "element-plus";
+import router from "@/router";
 
 enum MSG {
     '操作成功' = 200,
@@ -38,7 +39,14 @@ const $post= axios.create({
      }
      return resp;
  }, error => {
-     return Promise.reject(error);
+     console.log(error);
+
+     // 检查 error.response 是否存在
+     const status = error.response ? error.response.status : null;
+     if (status === 401) {
+         ElMessage.error('登陆失效');
+         router.push('/login');
+     }
  })
 
 

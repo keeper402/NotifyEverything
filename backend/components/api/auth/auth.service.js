@@ -1,26 +1,30 @@
 const encrypt = require("../../../utils/encrypt");
 const logger = require("../../../utils/logger");
 const KvStore = require("../../../support/kv");
+const _ = require("lodash");
+
+
+const LOGIN_FAIL = '';
 
 class AuthService {
 
     static async login(body) {
-        if (await this.verifyAuth(body)) {
+        if (await this.verifyAuth(body.data, body.signature)) {
             const token = encrypt.generateRandomString(64);
-            await KvStore.set('token', token);
+            await KvStore.set('token', token, 60 * 60 * 20);
             return token;
         }
-        return '';
+        return LOGIN_FAIL;
     }
 
-    static async verifyAuth(body) {
+    static async verifyAuth(data, signature) {
         try {
-            console.log(body);
-            const object = JSON.parse(body.data);
+            logger.info(`data: ${data}, signature: ${signature}`);
+            const object = JSON.parse(data);
             if (!this.checkAuthData(object)) {
                 return false;
             }
-            return encrypt.verifyWithPublicKey(await this.getPassword(), body.data, body.signature);
+            return encrypt.verifyWithPublicKey(await this.getPassword(), data, signature);
         } catch (e) {
             logger.error('verifyAuth error', e)
         }
@@ -28,7 +32,19 @@ class AuthService {
     }
 
     static async getPassword() {
-        return encrypt.DEFAULT_PUBLIC_KEY;
+        const password = await KvStore.get(encrypt.PASS_KEY);
+        return password ? password : encrypt.DEFAULT_PUBLIC_KEY;
+    }
+
+    static async changePassword(oldPassword, newPassword) {
+        const password = await KvStore.get(encrypt.PASS_KEY);
+        const defaultPass = _.isEmpty(password) && oldPassword === encrypt.DEFAULT_PUBLIC_KEY;
+        console.log(`password: ${password}, defaultPass: ${defaultPass}, oldPassword: ${oldPassword}`);
+        if (defaultPass || password === oldPassword) {
+            await KvStore.set(encrypt.PASS_KEY, newPassword);
+            return true;
+        }
+        return false;
     }
 
     static async passwordChanged() {
@@ -74,4 +90,4 @@ const authValidator = async (req, res, next) => {
     next();
 }
 
-module.exports = {AuthService, authValidator};
+module.exports = {AuthService, authValidator, LOGIN_FAIL};

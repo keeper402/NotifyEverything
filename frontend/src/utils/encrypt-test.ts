@@ -1,5 +1,5 @@
-import forge from 'node-forge';
-// const forge = require('node-forge');
+// import forge from 'node-forge';
+const forge = require('node-forge');
 
 
 /**
@@ -7,7 +7,7 @@ import forge from 'node-forge';
  * @param masterKey 主密钥
  * @returns { publicKey: string, privateKey: string }
  */
-export function generateRSAKeyPairFromMasterKey(masterKey: string): { publicKey: string, privateKey: string } {
+function generateRSAKeyPairFromMasterKey(masterKey: string): { publicKey: string, privateKey: string } {
     // 使用主密钥生成一个种子
     const md = forge.md.sha256.create();
     md.update(masterKey);
@@ -36,21 +36,21 @@ export function generateRSAKeyPairFromMasterKey(masterKey: string): { publicKey:
 
 
 // 私钥解密
-export function encryptWithPublicKey(publicKeyPem: string, data: string): string {
+function encryptWithPublicKey(publicKeyPem: string, data: string): string {
     const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
     const encrypted = publicKey.encrypt(forge.util.encodeUtf8(data));
     return forge.util.encode64(encrypted);
 }
 
 // 公钥加密
-export function decryptWithPrivateKey(privateKeyPem: string, encryptedData: string): string {
+function decryptWithPrivateKey(privateKeyPem: string, encryptedData: string): string {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
     const decrypted = privateKey.decrypt(forge.util.decode64(encryptedData));
     return forge.util.decodeUtf8(decrypted);
 }
 
 // 私钥签名
-export function signWithPrivateKey(privateKeyPem: string, data: string): string {
+function signWithPrivateKey(privateKeyPem: string, data: string): string {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
     const md = forge.md.sha256.create();
     md.update(data, 'utf8');
@@ -59,7 +59,7 @@ export function signWithPrivateKey(privateKeyPem: string, data: string): string 
 }
 
 // 公钥验签
-export function verifyWithPublicKey(publicKeyPem: string, data: string, signature: string): boolean {
+function verifyWithPublicKey(publicKeyPem: string, data: string, signature: string): boolean {
     const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
     const md = forge.md.sha256.create();
     md.update(data, 'utf8');
@@ -67,7 +67,7 @@ export function verifyWithPublicKey(publicKeyPem: string, data: string, signatur
 }
 
 
-export function generateRandomString(length: number): string {
+function generateRandomString(length: number): string {
     if (length % 2 !== 0) {
         throw new Error("The length must be an even number.");
     }

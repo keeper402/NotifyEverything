@@ -1,15 +1,8 @@
 const forge = require('node-forge');
 
 const DEFAULT_PASSWORD = '123123';
-const DEFAULT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5LCHxMZy5x68DG7lLeJo
-H3KGkMvnas2NNzrnSbadpxKBBYvMHhFywWBtoZYmfYoNX8cKTny42smTJ8CIWK0m
-4FkIPUqegA1/VjGSaQHTKS2W4UiC8eE2/f0KmRQogxPcNBgla9sBoLdNUt1fcwM4
-+d6DLBrBSuGis+AAKSzCUzSCFL0o9O8mID4u0QMyl0xQnzwVWu1xVpgU6K0o5Ck+
-1bUfJBXvU8R78vhk+s25dkQeFmk7cuOdF8gKVH3jRy5qgQLPUp07+Tw9ZAul6Huc
-9oLk5tfQ6Tzmfj6BYjBV4RCwGMegpfEukE4BYsix0KAYZ0Gj6pop9a0db+iINInp
-gwIDAQAB
------END PUBLIC KEY-----`
+const PASS_KEY = 'password';
+const DEFAULT_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\r\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDksIfExnLnHrwMbuUt4mgfcoaQ\r\ny+dqzY03OudJtp2nEoEFi8weEXLBYG2hliZ9ig1fxwpOfLjayZMnwIhYrShoNoLZ\r\nROXJ1xZCeomsBq0C4j7jUqeCUzMTWBBJjq9BB0GvKRDanhEBqbA0s8Ntu2er4ykH\r\nrOgcFeQ32elcJX2gowIDAQAB\r\n-----END PUBLIC KEY-----\r\n"
 
 // 公钥验签
 function verifyWithPublicKey(publicKeyPem, data, signature) {
@@ -36,7 +29,7 @@ function generateRandomString(length) {
 }
 
 
-module.exports = {verifyWithPublicKey, decryptWithPrivateKey, generateRandomString, DEFAULT_PASSWORD, DEFAULT_PUBLIC_KEY}
+module.exports = {verifyWithPublicKey, decryptWithPrivateKey, generateRandomString, DEFAULT_PASSWORD, DEFAULT_PUBLIC_KEY,PASS_KEY}
 
 //
 // const data = JSON.parse('{"signature":"t1I7K8Kq3WhcaRfcEXO2RdWQWBzlNBjCjxLPeYHzn7PKfbpWY6hznLhGfQocd0o4tGN4fChQ8vdVjaxtI87fbdBZ+4OZri6PoNtC7xkwq1Lp11SpWBEyKW+dsDHzfaKcUaI/9lQsN/cAT5E+K/uYOQLrWcAU7bab3ZyXxkaui06ZTMZn3/4RHsq50MkxSQLnJM7ajB3VrZuYrkQCwj+gUAITuAH2CP8rubkSdJozgoIwxzUqd62nC2p9dUMigN0yogpSQaNXiizlBf78ezGDycQZUtAhCXgFF64aTav2CNdia2LOx+sB25td6zlqIMs694/HjANivTSX5XiwenL8/Q==","data":"{\\"time\\":1722367231799,\\"rnd\\":\\"4ecadc61932330cf\\"}"}');

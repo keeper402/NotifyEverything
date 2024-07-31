@@ -6,8 +6,11 @@ export interface LoginReq {
 }
 
 
-export interface LoginRes {
-    token: string;
+export interface ChangePasswordReq {
+    oldPassword: string;
+    newPassword: string;
 }
 
 export const login  = (data: LoginReq) => $post({url:"/login", data:data});
+
+export const changePass  = (data: ChangePasswordReq) => $post({url:"/changePassword", data:data});

@@ -69,8 +69,10 @@ export default defineComponent({
         const signature = signWithPrivateKey(pair.privateKey, stringify);
         login({signature: signature, data: stringify}).then((response) => {
           console.log(response);
-          if (response.data.success) {
-            localStorage.setItem('loginRes', JSON.stringify(response.data));
+          if (response?.data?.success) {
+            localStorage.setItem('PUBLIC_KEY', pair.publicKey);
+            localStorage.setItem('PRIVATE_KEY', pair.privateKey);
+            localStorage.setItem('token', JSON.stringify(response.data.token));
             router.push('/');
           }
         });

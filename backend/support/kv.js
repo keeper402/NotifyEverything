@@ -2,8 +2,14 @@ const {kv} = require("@vercel/kv");
 
 class KvStore {
 
-    static async set(key, value) {
-        await kv.set(key, value);
+    static async set(key, value, expire) {
+        if (expire) {
+            await kv.set(key, value, {
+                expiry: Date.now() + expire * 1000
+            });
+        } else {
+            await kv.set(key, value);
+        }
     }
 
     static async get(key) {

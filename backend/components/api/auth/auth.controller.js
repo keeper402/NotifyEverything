@@ -1,7 +1,8 @@
 const ValidatorUtils = require("../../../utils/validator");
 const CommonUtils = require("../../../utils/common");
-const {AuthService} = require("./auth.service");
-const cookieParser = require("cookie-parser");
+const {AuthService, LOGIN_FAIL} = require("./auth.service");
+const encrypt = require("../../../utils/encrypt");
+const ApiDTO = require("../../types/ApiDTO");
 
 class Auth {
 
@@ -15,7 +16,7 @@ class Auth {
         try {
             console.log(req.body);
             const token = await AuthService.login(req.body);
-            if (token === '') {
+            if (token === LOGIN_FAIL) {
                 return res.json({
                     success: false,
                     code: 100,
@@ -28,19 +29,26 @@ class Auth {
                 secure: true,   // 仅在 HTTPS 下发送
                 sameSite: 'Strict' // 防止 CSRF 攻击
             });
-            return res.json({
-                success: true,
-                code: 0,
-                message: 'OK',
-                data: {
-                    token: token
-                }
-            });
+            return res.json(ApiDTO.success({token: token}));
         } catch (err) {
             return CommonUtils.catchError(res, err);
         }
     }
-}
 
+    static async changePassValidator(req, res, next) {
+        req.checkBody('oldPassword', 'oldPassword not valid').notEmpty();
+        req.checkBody('newPassword', 'newPassword not valid').notEmpty();
+        // req.checkBody('newPassword', 'newPassword can not be default pass').not(encrypt.DEFAULT_PUBLIC_KEY);
+        return await ValidatorUtils.errorMapped(req, res, next);
+    }
+
+    static async changePass(req, res) {
+        const changed = await AuthService.changePassword(req.body.oldPassword, req.body.newPassword);
+        if (changed) {
+            return res.json(ApiDTO.success(null));
+        }
+        return res.json(ApiDTO.error(101, 'wrong password'));
+    }
+}
 
 module.exports = Auth;
