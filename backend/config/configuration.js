@@ -43,7 +43,7 @@ async function reloadConfig() {
                 }
             }
         }
-        logger.info('in start, config is: ' + configStr);
+        logger.info('in start, config is: \n' + configStr);
     } catch (e) {
         logger.error(e);
         return Const.CONFIG_ACCESS_ERROR;

@@ -7,14 +7,15 @@
   "scripts": {
     "start": "better-npm-run build:dev",
     "build:stage": "better-npm-run build:stage",
-    "build:prod": "better-npm-run build:prod"
+    "build:prod": "better-npm-run build:prod",
+    "build": "better-npm-run build:prod"
   },
   "betterScripts": {
     "build:dev": {
       "command": "nodemon server.js",
       "env": {
         "mode": "dev",
-        "port": 3000
+        "port": 80
       }
     },
     "build:stage": {
@@ -25,7 +26,7 @@
       }
     },
     "build:prod": {
-      "command": "sudo pm2 start server.js",
+      "command": "node server.js",
       "env": {
         "mode": "prod",
         "port": 80
