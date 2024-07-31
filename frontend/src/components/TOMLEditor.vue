@@ -1,5 +1,7 @@
 <template>
+  <div class="editor-container">
     <div id="editor" class="code-editor"></div>
+  </div>
 </template>
 
 <script>
@@ -64,9 +66,11 @@ export default {
 <style>
 
 .code-editor {
-  width: 1000px; /* 默认宽度 */
+  display: flex;
+  width: 100%;
+  max-width: 1000px; /* 默认宽度 */
   height: 100%; /* 高度自动调整 */
-  min-height: 1000px; /* 最小高度 */
+  min-height: 350px; /* 最小高度 */
   padding: 0; /* 盒子内部边距 */
   box-sizing: border-box; /* 确保padding不影响宽高 */
   overflow: hidden; /* 不显示外部滚动条 */
@@ -76,8 +80,16 @@ export default {
 
 /* 响应式样式 */
 @media (max-width: 1000px) {
-  .code-editor {
-    width: calc(100% - 40px); /* 当宽度小于1000px时，盒子跟随缩小 */
+
+  .editor-container {
+    height: 80vh;
   }
+
+}
+
+.editor-container {
+  display: flex;
+  height: 80vh;
+  width: 100%;
 }
 </style>

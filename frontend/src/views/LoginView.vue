@@ -75,6 +75,7 @@ export default defineComponent({
           }
         });
       } catch (error) {
+        console.log(error);
         ElMessage.error('未知异常')
       }
     }
