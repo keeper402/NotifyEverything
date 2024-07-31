@@ -15,11 +15,21 @@ export interface ApiResponse<T> {
 }
 
 
-const $post= axios.create({
+export const $post = axios.create({
     baseURL: '/api',
     method: 'post',
     timeout: 5000,
-    headers:{
+    headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Accept': 'application/json',
+    }
+});
+
+export const $get = axios.create({
+    baseURL: '/api',
+    method: 'get',
+    timeout: 5000,
+    headers: {
         'Content-Type': 'application/json;charset=UTF-8',
         'Accept': 'application/json',
     }
@@ -32,22 +42,22 @@ const $post= axios.create({
 //     return config;
 // })
 
- $post.interceptors.response.use(resp => {
-     if (resp.data.success !== true) {
-         ElMessage.error(resp.data.message)
-         return resp;
-     }
-     return resp;
- }, error => {
-     console.log(error);
+const onFulfilled = (resp: any) => {
+    if (resp.data.success !== true) {
+        ElMessage.error(resp.data.message)
+        return resp;
+    }
+    return resp;
+};
+const onRejected = (error: any) => {
+    console.log(error);
+    // 检查 error.response 是否存在
+    const status = error.response ? error.response.status : null;
+    if (status === 401) {
+        ElMessage.error('登陆失效');
+        router.push('/login');
+    }
+};
+$post.interceptors.response.use(onFulfilled, onRejected)
+$get.interceptors.response.use(onFulfilled, onRejected)
 
-     // 检查 error.response 是否存在
-     const status = error.response ? error.response.status : null;
-     if (status === 401) {
-         ElMessage.error('登陆失效');
-         router.push('/login');
-     }
- })
-
-
-export default $post;

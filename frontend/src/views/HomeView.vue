@@ -6,9 +6,11 @@
     <div class="context-view">
       <div class="head-of-edit">
         <h1>Config File</h1>
-        <el-button class="right" type="primary">Submit</el-button>
+        <el-button class="right" type="primary" @click="showConfig()" style="display: none">showConfig</el-button>
+        <el-button class="right" type="primary" @click="loadConfig()" style="display: none">loadConfig</el-button>
+        <el-button class="right" type="primary" @click="submitConfig()">Submit</el-button>
       </div>
-      <TOMLEditor/>
+      <TOMLEditor :config="config" @update:config="updateConfig"/>
     </div>
   </div>
 
@@ -38,20 +40,65 @@
 
 <script setup lang="ts">
 import TOMLEditor from "@/components/TOMLEditor.vue";
-import {reactive, ref} from 'vue'
+import {getCurrentInstance, onMounted, reactive, ref} from 'vue'
 import {ElMessage} from "element-plus";
 import _ from "lodash";
-import {changePass} from "@/api/api";
+import {changePass, getConfig, saveConfig} from "@/api/api";
 import {generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
+import {tryRefreshToken} from "@/service/login";
+import {useRouter} from "vue-router";
 
 const dialogFormVisible = ref(false)
 const formLabelWidth = '140px'
+const REFRESH_TOKEN_TASK_ID = 'REFRESH_TOKEN_TASK_ID';
 
 const form = reactive({
   oldPassword: '',
   oldPasswordRepeat: '',
   newPassword: '',
 })
+
+const config = ref('# Sample TOML\n[WaitLoading]\nminTime = 1\nmaxTime = "infinite"\n# This is a comment');
+
+const updateConfig = (newConfig: string) => {
+  config.value = newConfig; // 更新 config
+};
+const router = useRouter();
+
+onMounted(() => {
+  loadConfig();
+  const globalProperties = getCurrentInstance()?.appContext.config.globalProperties;
+  globalProperties?.$registerTask(REFRESH_TOKEN_TASK_ID, tryRefreshToken);
+  globalProperties?.$startInterval(); // 调用 $startInterval
+});
+
+function submitConfig() {
+  saveConfig({config:config.value}).then(res=>{
+    if (res?.data?.success) {
+      ElMessage.info('保存成功✌️');
+    } else {
+      ElMessage.info('保存失败😡');
+    }
+  })
+}
+
+function loadConfig() {
+  getConfig().then(res => {
+    console.log(res);
+    if (res?.data?.success) {
+      const configRes = res?.data?.data?.config;
+      if (!_.isEmpty(configRes)) {
+        config.value = configRes;
+      } else {
+        config.value = '';
+      }
+    }
+  });
+}
+
+function showConfig() {
+  console.log(config.value)
+}
 
 function changePassword() {
   try {
@@ -81,7 +128,7 @@ function changePassword() {
     changePass({oldPassword: pairOld.publicKey, newPassword: pairNew.publicKey}).then(response => {
       console.log(response);
       if (response?.data?.success) {
-        ElMessage.error('修改成功');
+        ElMessage.info('修改成功');
       } else {
         // ElMessage.error('密码错误');
       }

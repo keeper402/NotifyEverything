@@ -5,22 +5,46 @@
 </template>
 
 <script>
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import * as monaco from 'monaco-editor';
+import * as _ from 'lodash'
 
 export default {
   name: 'TOMLEditor',
-  setup() {
-    const editor = ref(null);
+  props: {
+    config: String,
+  },
+  emits: ['update:config'], // 定义事件
+  setup(props, {emit}) {
 
     onMounted(() => {
       registerTomlForEditor();
       // 初始化 Monaco Editor
-      editor.value = monaco.editor.create(document.getElementById('editor'), {
-        value: '# Sample TOML\n[person]\nage = 10\nname = "tom"\n# This is a comment',
+      const editorCtx = monaco.editor.create(document.getElementById('editor'), {
+        value:  '# Sample TOML\n[WaitLoading]\nminTime = 1\nmaxTime = "infinite"\n# This is a comment',
         language: 'toml',
         theme: 'vs-dark',
       });
+
+      // 监听编辑器内容变化
+      editorCtx.onDidChangeModelContent(() => {
+        const newValue = editorCtx.getValue();
+        debouncedUpdate(newValue);
+      });
+
+      const debouncedUpdate = _.debounce((newValue) => {
+        // 更新逻辑
+        emit('update:config', newValue); // 发出更新事件
+      }, 10); // 10毫秒的防抖
+
+      watch(
+          () => props.config,
+          (newConfig) => {
+            if (newConfig !== editorCtx.getValue()) {
+              editorCtx.setValue(newConfig);
+            }
+          }
+      );
     });
 
     //注册toml 规则

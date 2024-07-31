@@ -9,6 +9,7 @@
         :rules="rules"
         label-width="auto"
         class="loginForm"
+        @submit.prevent="submit"
     >
       <el-form-item label="密码" prop="password">
         <el-input
@@ -28,12 +29,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, reactive, toRefs} from 'vue'
+import {defineComponent, onMounted, reactive, toRefs} from 'vue'
 import {useRouter} from 'vue-router';
 import {InitLoginData} from "../types/login";
-import {login} from "@/api/api";
-import {generateRandomString, generateRSAKeyPairFromMasterKey, signWithPrivateKey} from "@/utils/encrypt";
-import {ElMessage} from "element-plus";
+import {generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
+import {loginByRSAKey} from "@/service/login";
 
 export default defineComponent({
   setup() {
@@ -50,6 +50,7 @@ export default defineComponent({
     let router = useRouter();
 
     const submit = () => {
+      console.log('do submit')
       data.loginFormRef?.validate((isValid) => {
             if (isValid) {
               doLogin(data.loginForm.password);
@@ -59,30 +60,11 @@ export default defineComponent({
     }
 
     function doLogin(password: string): void {
-      try {
-        const pair = generateRSAKeyPairFromMasterKey(password);
-        const info = {
-          time: Date.now(),
-          rnd: generateRandomString(16)
-        };
-        const stringify = JSON.stringify(info);
-        const signature = signWithPrivateKey(pair.privateKey, stringify);
-        login({signature: signature, data: stringify}).then((response) => {
-          console.log(response);
-          if (response?.data?.success) {
-            localStorage.setItem('PUBLIC_KEY', pair.publicKey);
-            localStorage.setItem('PRIVATE_KEY', pair.privateKey);
-            localStorage.setItem('token', JSON.stringify(response.data.token));
-            router.push('/');
-          }
-        });
-      } catch (error) {
-        console.log(error);
-        ElMessage.error('未知异常')
-      }
+      const pair = generateRSAKeyPairFromMasterKey(password);
+      loginByRSAKey(pair.privateKey, pair.publicKey, true);
     }
 
-    return {...toRefs(data), rules, submit: submit}
+    return {...toRefs(data), rules, submit}
   }
 })
 </script>
