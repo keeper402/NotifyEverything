@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "echo 'Starting build...' && vue-cli-service build && echo 'Build complete.'",
     "lint": "vue-cli-service lint",
     "start": "vue-cli-service serve"
   },
