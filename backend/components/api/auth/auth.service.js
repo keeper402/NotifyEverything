@@ -69,7 +69,7 @@ class AuthService {
 }
 
 const authValidator = async (req, res, next) => {
-    if (req.url === '/login') {
+    if (req.url === '/login' || req.url === '/' || req.url === '/api/login') {
         next();
         return;
     }

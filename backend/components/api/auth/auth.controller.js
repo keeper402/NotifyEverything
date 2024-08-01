@@ -1,7 +1,6 @@
 const ValidatorUtils = require("../../../utils/validator");
 const CommonUtils = require("../../../utils/common");
 const {AuthService, LOGIN_FAIL} = require("./auth.service");
-const encrypt = require("../../../utils/encrypt");
 const ApiDTO = require("../../types/ApiDTO");
 
 class Auth {

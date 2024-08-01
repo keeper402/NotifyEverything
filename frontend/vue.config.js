@@ -1,7 +1,7 @@
 const { defineConfig } = require('@vue/cli-service');
 
 module.exports = defineConfig({
-  transpileDependencies: true,
+    transpileDependencies: true,
     chainWebpack: (config) => {
         // 通过 babel-loader 配置 Babel 插件
         config.module
@@ -26,5 +26,5 @@ module.exports = defineConfig({
         }
     },
     // ...其他配置
-    // outputDir: '../dist', // 将输出目录设置为根目录下的 dist 文件夹 (这样Vercel可以部署并展示前端)
+    outputDir: '../dist',
 });
