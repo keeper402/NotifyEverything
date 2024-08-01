@@ -11,3 +11,4 @@ package-lock.json
 /frontend/yarn.lock
 /yarn.lock
 .vercel
+/frontend/dist/
