@@ -8,7 +8,7 @@
   "scripts": {
     "start:frontend": "yarn workspace frontend serve",
     "start:backend": "yarn workspace backend start",
-    "start": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
+    "start": "yarn start:frontend && yarn start:backend",
     "build:frontend": "yarn workspace frontend build",
     "build:backend": "yarn workspace backend build",
     "build": "yarn build:frontend && yarn build:backend"
@@ -18,6 +18,5 @@
     "**/@types/lodash"
   ],
   "dependencies": {
-    "concurrently": "^8.2.2"
   }
 }

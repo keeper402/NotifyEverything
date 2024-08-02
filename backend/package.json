@@ -12,7 +12,7 @@
   },
   "betterScripts": {
     "build:dev": {
-      "command": "nodemon server.js",
+      "command": "node server.js",
       "env": {
         "mode": "dev",
         "port": 3000
