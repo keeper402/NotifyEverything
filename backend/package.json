@@ -8,7 +8,8 @@
     "start": "better-npm-run build:dev",
     "build:stage": "better-npm-run build:stage",
     "build:prod": "better-npm-run build:prod",
-    "build": "better-npm-run build:prod"
+    "build": "better-npm-run build:prod",
+    "build:server": "better-npm-run build:server"
   },
   "betterScripts": {
     "build:dev": {
@@ -29,6 +30,13 @@
       "command": "node server.js",
       "env": {
         "mode": "prod",
+        "port": 80
+      }
+    },
+    "build:server": {
+      "command": "node server-with-dist.js",
+      "env": {
+        "mode": "server",
         "port": 80
       }
     }

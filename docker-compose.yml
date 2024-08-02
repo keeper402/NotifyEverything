@@ -9,6 +9,7 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile.single  # 单服务
     ports:
       - "3000:3000"
 

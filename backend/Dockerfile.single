@@ -19,7 +19,7 @@ RUN yarn install
 COPY . .
 
 # 暴露端口
-EXPOSE 80
+EXPOSE 3000
 
 # 启动后端应用
-CMD ["yarn", "build:server"]
+CMD ["node", "server.js"]
