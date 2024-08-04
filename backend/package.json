@@ -5,7 +5,8 @@
   "repository": {},
   "license": "",
   "scripts": {
-    "start": "better-npm-run build:dev",
+    "start": "better-npm-run build:debug",
+    "debug": "better-npm-run build:debug",
     "build:stage": "better-npm-run build:stage",
     "build:prod": "better-npm-run build:prod",
     "build": "better-npm-run build:prod",
@@ -14,6 +15,13 @@
   "betterScripts": {
     "build:dev": {
       "command": "node server.js",
+      "env": {
+        "mode": "dev",
+        "port": 3000
+      }
+    },
+    "build:debug": {
+      "command": "nodemon server.js",
       "env": {
         "mode": "dev",
         "port": 3000

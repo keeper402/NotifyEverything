@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, watch} from 'vue';
 import * as monaco from 'monaco-editor';
 import * as _ from 'lodash'
 

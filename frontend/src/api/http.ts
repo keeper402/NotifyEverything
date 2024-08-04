@@ -2,10 +2,10 @@ import axios from 'axios';
 import {ElMessage} from "element-plus";
 import router from "@/router";
 
-enum MSG {
-    '操作成功' = 200,
-    '密码错误' = 500,
-}
+// enum MSG {
+//     '操作成功' = 200,
+//     '密码错误' = 500,
+// }
 
 export interface ApiResponse<T> {
     success: boolean;

@@ -18,6 +18,16 @@ class Config {
         const config = await ConfigService.get();
         return res.json(ApiDTO.success(config));
     }
+
+    static async saveEncrypt(req, res) {
+        await ConfigService.saveEncrypt(req.body.encrypt, req.body.config);
+        return res.json(success({}));
+    }
+
+    static async getEncrypt(req, res) {
+        const encrypt = await ConfigService.getEncrypt();
+        return res.json(ApiDTO.success({encrypt: encrypt}));
+    }
 }
 
 module.exports = Config;

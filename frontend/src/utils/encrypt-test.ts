@@ -35,14 +35,14 @@ function generateRSAKeyPairFromMasterKey(masterKey: string): { publicKey: string
 }
 
 
-// 私钥解密
+// 公钥加密
 function encryptWithPublicKey(publicKeyPem: string, data: string): string {
     const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
     const encrypted = publicKey.encrypt(forge.util.encodeUtf8(data));
     return forge.util.encode64(encrypted);
 }
 
-// 公钥加密
+// 私钥解密
 function decryptWithPrivateKey(privateKeyPem: string, encryptedData: string): string {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
     const decrypted = privateKey.decrypt(forge.util.decode64(encryptedData));

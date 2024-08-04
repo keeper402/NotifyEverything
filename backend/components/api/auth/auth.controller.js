@@ -2,6 +2,8 @@ const ValidatorUtils = require("../../../utils/validator");
 const CommonUtils = require("../../../utils/common");
 const {AuthService, LOGIN_FAIL} = require("./auth.service");
 const ApiDTO = require("../../types/ApiDTO");
+const ConfigService = require("../config/config.service");
+const _ = require("lodash");
 
 class Auth {
 
@@ -42,8 +44,15 @@ class Auth {
     }
 
     static async changePass(req, res) {
+        const isEncrypt = await ConfigService.getEncrypt();
+        if (isEncrypt && _.isEmpty(req.body.config)) {
+            return res.json(ApiDTO.error(130, 'need config when change Password in encrypt mode'));
+        }
         const changed = await AuthService.changePassword(req.body.oldPassword, req.body.newPassword);
         if (changed) {
+            if (isEncrypt) {
+                await ConfigService.save(req.body.config);
+            }
             return res.json(ApiDTO.success(null));
         }
         return res.json(ApiDTO.error(101, 'wrong password'));

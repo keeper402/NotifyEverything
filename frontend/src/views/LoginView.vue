@@ -29,8 +29,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted, reactive, toRefs} from 'vue'
-import {useRouter} from 'vue-router';
+import {defineComponent, reactive, toRefs} from 'vue'
 import {InitLoginData} from "../types/login";
 import {generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
 import {loginByRSAKey} from "@/service/login";
@@ -47,7 +46,6 @@ export default defineComponent({
         {min: 6, message: '密码长度大于等于6', trigger: 'blur'},
       ],
     }
-    let router = useRouter();
 
     const submit = () => {
       console.log('do submit')

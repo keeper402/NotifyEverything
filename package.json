@@ -8,7 +8,7 @@
   "scripts": {
     "start:frontend": "yarn workspace frontend serve",
     "start:backend": "yarn workspace backend start",
-    "start": "yarn start:frontend && yarn start:backend",
+    "start": "yarn start:backend && yarn start:frontend",
     "build:frontend": "yarn workspace frontend build",
     "build:backend": "yarn workspace backend build",
     "build": "yarn build:frontend && yarn build:backend"

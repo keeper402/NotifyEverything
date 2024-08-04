@@ -12,6 +12,10 @@ export interface ChangePasswordReq {
 }
 
 export interface SaveConfigReq {
+    config: any;
+}
+export interface SaveEncryptConfigReq {
+    encrypt: boolean;
     config: string;
 }
 
@@ -21,3 +25,6 @@ export const changePass  = (data: ChangePasswordReq) => $post({url:"/changePassw
 
 export const getConfig  = () => $get({url:"/config/get"});
 export const saveConfig  = (data: SaveConfigReq) => $post({url:"/config/save", data:data});
+
+export const getEncryptSwitch  = () => $get({url:"/config/getEncrypt"});
+export const saveEncryptSwitch  = (data: SaveEncryptConfigReq) => $post({url:"/config/saveEncrypt", data:data});

@@ -9,6 +9,8 @@ const util = require('util');
 const _ = require('lodash');
 const logger = require("../utils/logger");
 const ConfigService = require("../components/api/config/config.service");
+const {AuthService} = require("../components/api/auth/auth.service");
+const {decryptByAES, calculateMD5} = require("../utils/encrypt");
 
 
 config = {};
@@ -38,8 +40,15 @@ async function reloadConfig() {
                 configStr = process.env.DEFAULT_CONFIG;
             } else {
                 const configInKv = await ConfigService.get();
-                if (!_.isEmpty(configInKv.config)) {
-                    configStr = configInKv.config;
+                if (!_.isEmpty(configInKv?.config)) {
+                    const isEncrypt = await ConfigService.getEncrypt();
+                    if (!isEncrypt) {
+                        configStr = configInKv.config;
+                    } else {
+                        const pubKey = await AuthService.getPassword();
+                        const aesKey = calculateMD5(pubKey);
+                        configStr = decryptByAES(configInKv.config, aesKey);
+                    }
                 }
             }
         }

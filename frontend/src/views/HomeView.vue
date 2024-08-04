@@ -1,21 +1,39 @@
 <template>
   <div class="home-view">
     <div class="header-view">
-      <el-button plain class="right" @click="dialogFormVisible = true">Change Password</el-button>
+      <el-button plain class="button" style="margin-left: auto" @click="changePassDialogVisible = true">Change Password</el-button>
     </div>
     <div class="context-view">
       <div class="head-of-edit">
         <h1>Config File</h1>
-        <el-button class="right" type="primary" @click="showConfig()" style="display: none">showConfig</el-button>
-        <el-button class="right" type="primary" @click="loadConfig(false)" style="display: none">loadConfig</el-button>
-        <el-button class="right" type="primary" @click="submitConfig()">Submit</el-button>
+        <el-button class="button" type="primary" @click="showConfig()" style="display: none">showConfig</el-button>
+        <div class="head-buttons">
+          <el-button class="button" @click="settingDialogVisible = true">Settings</el-button>
+          <el-button class="button" type="primary" @click="submitConfig()">Submit</el-button>
+        </div>
       </div>
       <TOMLEditor :config="config" @update:config="updateConfig"/>
     </div>
   </div>
 
+  <el-dialog v-model="settingDialogVisible" title="Settings" width="500" class="dialogLoadingClass">
+    <el-form :model="form">
+      <el-form-item label="Encrypt Config" :label-width="formLabelWidth">
+        <el-switch v-model="encryptConfig" @click="switchEncrypt" :disabled="encryptConfigDisable"/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="settingDialogVisible = false ;settingLoading = true">Close</el-button>
+        <!--        <el-button type="primary" @click="confirmSettings">-->
+        <!--          Confirm-->
+        <!--        </el-button>-->
+      </div>
+    </template>
+  </el-dialog>
 
-  <el-dialog v-model="dialogFormVisible" title="Change Password" width="500">
+
+  <el-dialog v-model="changePassDialogVisible" title="Settings" width="500">
     <el-form :model="form">
       <el-form-item label="old password" :label-width="formLabelWidth">
         <el-input v-model="form.oldPassword" type="password" autocomplete="off"/>
@@ -29,7 +47,7 @@
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button @click="changePassDialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="changePassword">
           Confirm
         </el-button>
@@ -41,14 +59,17 @@
 <script setup lang="ts">
 import TOMLEditor from "@/components/TOMLEditor.vue";
 import {getCurrentInstance, onMounted, reactive, ref} from 'vue'
-import {ElMessage} from "element-plus";
+import {ElMessage, ElLoading} from "element-plus";
 import _ from "lodash";
-import {changePass, getConfig, saveConfig} from "@/api/api";
-import {generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
+import {changePass, getConfig, getEncryptSwitch, saveConfig, saveEncryptSwitch} from "@/api/api";
+import {calculateMD5, decryptByAES, generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
 import {tryRefreshToken} from "@/service/login";
-import {useRouter} from "vue-router";
 
-const dialogFormVisible = ref(false)
+const changePassDialogVisible = ref(false)
+const settingDialogVisible = ref(false)
+const encryptConfig = ref(false)
+const encryptConfigDisable = ref(true)
+const settingLoading = ref(false)
 const formLabelWidth = '140px'
 const REFRESH_TOKEN_TASK_ID = 'REFRESH_TOKEN_TASK_ID';
 
@@ -63,10 +84,10 @@ const config = ref('# Sample TOML\n[WaitLoading]\nminTime = 1\nmaxTime = "infini
 const updateConfig = (newConfig: string) => {
   config.value = newConfig; // 更新 config
 };
-const router = useRouter();
 
 onMounted(() => {
-  loadConfig(false);
+  const encryptSwitchPromise = loadEncryptSwitch();
+  loadConfig(false, encryptSwitchPromise);
   const globalProperties = getCurrentInstance()?.appContext.config.globalProperties;
   globalProperties?.$registerTask(REFRESH_TOKEN_TASK_ID, tryRefreshToken);
   globalProperties?.$startInterval(); // 调用 $startInterval
@@ -82,18 +103,40 @@ function submitConfig() {
   })
 
   //5秒后刷新配置
-  setTimeout(() => loadConfig(true), 5 * 1000);
+  setTimeout(() => loadConfig(true, null), 5 * 1000);
 }
 
-function loadConfig(showSuccess: boolean) {
-  getConfig().then(res => {
-    console.log(res);
+function loadConfig(showSuccess: boolean, encryptSwitchPromise: Promise<any> | null) {
+  getConfig().then(async res => {
+    let encrypted = encryptConfig.value;
+    if (encryptSwitchPromise !== null) {
+      const encryptCallData = await encryptSwitchPromise;
+      if (encryptCallData?.data?.success && encryptCallData?.data?.data?.encrypt !== undefined) {
+        encrypted = encryptCallData?.data?.data?.encrypt;
+      }
+    }
     if (res?.data?.success) {
       const data = res?.data?.data;
-      if (!_.isEmpty(data?.config)) {
-        config.value = data?.config;
+      if (!encrypted) {
+        if (!_.isEmpty(data?.config)) {
+          config.value = data?.config;
+        } else {
+          config.value = '';
+        }
       } else {
-        config.value = '';
+        const pubKey = localStorage.getItem('PUBLIC_KEY');
+        if (pubKey) {
+          try {
+            const aesKey = calculateMD5(pubKey);
+            const value = decryptByAES(data?.config, aesKey);
+            config.value = value ? value : '';
+          } catch (e) {
+            console.error(e);
+            ElMessage.error('解密数据失败😭');
+          }
+        } else {
+          ElMessage.error('请重新登陆');
+        }
       }
       if (data?.configStatus !== 'OK') {
         switch (data?.configStatus) {
@@ -130,7 +173,6 @@ function changePassword() {
       return;
     }
 
-
     const pairOld = generateRSAKeyPairFromMasterKey(form.oldPassword);
     const pubKey = localStorage.getItem('PUBLIC_KEY');
     if (pubKey) {
@@ -148,10 +190,49 @@ function changePassword() {
         // ElMessage.error('密码错误');
       }
     })
-    dialogFormVisible.value = false;
+    changePassDialogVisible.value = false;
   } catch (e) {
     ElMessage.error('未知异常');
   }
+}
+
+function loadEncryptSwitch() {
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: 'Loading...',
+    spinner: 'el-icon-loading',
+    background: 'rgba(255, 255, 255, 0.7)'
+  });
+  const encryptSwitchPromise = getEncryptSwitch();
+  encryptSwitchPromise.then(res => {
+    if (res?.data?.success) {
+      encryptConfig.value = res.data.data.encrypt;
+      encryptConfigDisable.value = false;
+    } else {
+      // ElMessage.error('密码错误');
+    }
+    loadingInstance.close();
+  });
+  return encryptSwitchPromise;
+}
+
+function switchEncrypt() {
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    target: '.dialogLoadingClass',
+    text: 'Loading...',
+    spinner: 'el-icon-loading',
+    background: 'rgba(255, 255, 255, 0.7)'
+  });
+  const data = {encrypt: encryptConfig.value, config: config.value};
+  saveEncryptSwitch(data).then(res => {
+    loadingInstance.close();
+    if (res?.data?.success) {
+      ElMessage.info('修改成功');
+    } else {
+      // ElMessage.error('密码错误');
+    }
+  });
 }
 
 </script>
@@ -180,19 +261,16 @@ function changePassword() {
 
 .head-of-edit {
   display: flex;
-  flex-direction: row; /* 垂直布局 */
+  flex-direction: row;
   width: 100%; /* 确保头部占满宽度 */
   align-items: center; /* 垂直居中 */;
   margin-bottom: 10px;
 }
 
-.right {
+.button {
   display: flex;
-  margin-left: auto; /* 强制向右对齐 */
-  margin-right: 10px;
 }
 
-/* 响应式样式 */
 @media (max-width: 1200px) {
   .context-view {
     width: calc(100% - 40px); /* 当宽度小于1000px时，盒子跟随缩小 */
@@ -201,10 +279,20 @@ function changePassword() {
 
 .header-view {
   display: flex;
-  flex-direction: row; /* 垂直布局 */
+  flex-direction: row;
   align-items: center; /* 垂直居中 */;
   background-color: dimgray;
   width: 100%;
   height: 50px;
+}
+
+.dialogLoadingClass {
+  display: flex;
+}
+
+.head-buttons {
+  display: flex;
+  flex-direction: row;
+  margin-left: auto; /* 强制向右对齐 */
 }
 </style>
