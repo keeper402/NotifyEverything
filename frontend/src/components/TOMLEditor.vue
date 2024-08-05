@@ -21,9 +21,10 @@ export default {
       registerTomlForEditor();
       // 初始化 Monaco Editor
       const editorCtx = monaco.editor.create(document.getElementById('editor'), {
-        value:  '# Sample TOML\n[WaitLoading]\nminTime = 1\nmaxTime = "infinite"\n# This is a comment',
+        value: '# Sample TOML\n[WaitLoading]\nminTime = 1\nmaxTime = "infinite"\n# This is a comment',
         language: 'toml',
         theme: 'vs-dark',
+        automaticLayout: true
       });
 
       // 监听编辑器内容变化
@@ -91,8 +92,7 @@ export default {
 
 .code-editor {
   display: flex;
-  width: 100%;
-  max-width: 1000px; /* 默认宽度 */
+  width: 1400px;
   height: 100%; /* 高度自动调整 */
   min-height: 350px; /* 最小高度 */
   padding: 0; /* 盒子内部边距 */
@@ -100,15 +100,7 @@ export default {
   overflow: hidden; /* 不显示外部滚动条 */
   flex-grow: 1; /* 允许编辑器容器扩展以占满剩余空间 */
   border-radius: 10px;
-}
-
-/* 响应式样式 */
-@media (max-width: 1000px) {
-
-  .editor-container {
-    height: 80vh;
-  }
-
+  resize: both; /* 可调整大小 */
 }
 
 .editor-container {
