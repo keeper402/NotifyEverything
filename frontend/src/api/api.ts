@@ -7,6 +7,7 @@ export interface LoginReq {
 
 
 export interface ChangePasswordReq {
+    config: any;
     oldPassword: string;
     newPassword: string;
 }

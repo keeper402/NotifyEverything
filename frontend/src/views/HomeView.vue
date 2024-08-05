@@ -64,6 +64,7 @@ import _ from "lodash";
 import {changePass, getConfig, getEncryptSwitch, saveConfig, saveEncryptSwitch} from "@/api/api";
 import {calculateMD5, decryptByAES, generateRSAKeyPairFromMasterKey} from "@/utils/encrypt";
 import {tryRefreshToken} from "@/service/login";
+import router from "@/router";
 
 const changePassDialogVisible = ref(false)
 const settingDialogVisible = ref(false)
@@ -164,8 +165,8 @@ function changePassword() {
       ElMessage.error('旧密码不能为空');
       return;
     }
-    if (_.isEmpty(form.newPassword)) {
-      ElMessage.error('新密码不能为空');
+    if (_.isEmpty(form.newPassword) || _.size(form.newPassword) <6) {
+      ElMessage.error('新密码必须在6位以上');
       return;
     }
     if (form.oldPassword !== form.oldPasswordRepeat) {
@@ -173,6 +174,12 @@ function changePassword() {
       return;
     }
 
+    const loadingInstance = ElLoading.service({
+      lock: true,
+      text: 'Loading...',
+      spinner: 'el-icon-loading',
+      background: 'rgba(255, 255, 255, 0.7)'
+    });
     const pairOld = generateRSAKeyPairFromMasterKey(form.oldPassword);
     const pubKey = localStorage.getItem('PUBLIC_KEY');
     if (pubKey) {
@@ -182,10 +189,13 @@ function changePassword() {
       }
     }
     const pairNew = generateRSAKeyPairFromMasterKey(form.newPassword);
-    changePass({oldPassword: pairOld.publicKey, newPassword: pairNew.publicKey}).then(response => {
+    changePass({oldPassword: pairOld.publicKey, newPassword: pairNew.publicKey, config:config.value}).then(response => {
       console.log(response);
+      loadingInstance.close();
       if (response?.data?.success) {
-        ElMessage.info('修改成功');
+        ElMessage.info('修改成功,请重新登陆');
+        document.cookie = 'token=; Max-Age=0; path=/';
+        router.push('/login');
       } else {
         // ElMessage.error('密码错误');
       }

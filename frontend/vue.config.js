@@ -25,5 +25,5 @@ module.exports = defineConfig({
         }
     },
     // ...其他配置
-    outputDir: '../dist',
+    // outputDir: '../dist',
 });
