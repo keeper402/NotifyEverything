@@ -1,4 +1,4 @@
-# 30分钟重新加载一次本配置
+# 30分钟重新加载一次本配置（默认不生效，如果ENV配置了CONFIG_URL，也就是说如果这份配置是来源于一个URL，自动重新加载就会生效）
 reloadInterval = 30
 
 #默认异常内容提醒
@@ -14,31 +14,47 @@ url='https://pastebin.com/raw/UL6ZCBGM' # 示例代码（建议打开看看）�
 # rest接口获取数据
 [resource.ASharesPrice]
 type = 'rest'
-# 这个接口是按日的，只能获取到前一天的数据。仅作示例
+# 这个接口是按日的，只能获取到前一天的数据。仅作示例，实际做不到实时监控
 url = 'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh000001&scale=240&ma=5&datalen=1'
 method = 'GET'
 #headers = '' # 没有header就不要设置，设置空字符串会报错
 body = '' # 使用post填body
 result = '$[0].low' # 使用jsonPath取对象。
 
-#webhook通知方式 钉钉机器人
+# msg是notify中定义的，这里会引入
+# webhook通知方式 钉钉机器人
 [notify.dingbot]
 type = 'webhook'
-url = 'https://oapi.dingtalk.com/robot/send?access_token=******************************************'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxx'
 method = 'post'
 headers = '{"content-type":"application/json;charset=utf-8"}'
 body = '{"msgtype":"text","text":{"content":"通知：${msg}"}}'
 
-# qq邮箱在设置-账户 里可以开一个smtp密码，填到pass里就可以用
+# type='mail'时，使用nodemailer发送邮件.搜索邮箱如何开通SMTP服务一般都可以拿到pass
 [notify.qqMail]
 type='mail'
-from='*****@qq.com'
-to='*****@qq.com'
-pass='*************'
+from='xxxxxx@qq.com'
+to='xxxxxx@qq.com'
+pass='这里填pass'
 title='规则：${context.ruleName} 发出通知'
 text='通知内容：${msg}'
 
+# 虽然写着webhook，但是本质是个请求，可以做的事很多
+# 比如给服务保活
+[notify.keepAlive]
+type = 'webhook'
+url = 'https://notify-everything.vercel.com/'
+method = 'get'
+
+# 比如每天重置这份示例配置，毕竟公开出去，一切都可能会被改。
+[notify.resetThisConfig]
+type = 'js'
+param='{"url":"xxxxxxxxxx", "token":"xxxx"}'
+url='https://raw.githubusercontent.com/keeper402/NotifyEverything/master/scripts/resetExampleCode'
+
+
 # 规则， 资源+条件+定时=>通知
+# condition中被${}包括的resource将会被执行，取得的值进入condition判断。也可以在msg中被引用
 # 检查癌股是不是又3000点以下了
 [rule.checkASharesBelow3000]
 interval = 1 # 每间隔1分钟执行一次检查
@@ -62,3 +78,16 @@ cron = '0 30 10,14,16 ? * MON-FRI '
 condition = "true"
 notify = 'dingbot'
 msg = '放下工作情节，尊重喝水命运'
+
+# 保活
+[rule.keepAliveForSite]
+cron = '0 0/3 * * * ?'
+condition = "true"
+notify = 'keepAlive'
+msg = ''
+
+# 每天重置本配置。这么配实际是会报错，因为notify不允许留空，但是执行了resetThisConfig效果就达到了，后续会补一下jsNotify
+[rule.resetThisConfigRule]
+cron = '0 0 0/6 * * ?'
+condition = "true"
+notify = 'resetThisConfig'

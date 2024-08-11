@@ -44,6 +44,10 @@ COPY nginx/nginx-docker.conf /etc/nginx/nginx.conf
 # 暴露端口
 EXPOSE 80
 
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo 'Asia/Shanghai' >/etc/timezone
+
 # 复制启动脚本
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh

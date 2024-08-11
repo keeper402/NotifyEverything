@@ -1,0 +1,21 @@
+const {Redis} = require('@upstash/redis');
+const axios = require('axios');
+
+const response = await axios.get('https://raw.githubusercontent.com/keeper402/NotifyEverything/master/config_example.toml');
+const config = response.data;
+
+
+
+const redis = new Redis({
+    url: param.url,
+    token: param.token,
+})
+
+
+redis.set('ENCRYPT', 'false');
+redis.set('config', config);
+redis.set('CONFIG_STATUS', 'OK');
+redis.set('token', '');
+redis.set('password', "-----BEGIN PUBLIC KEY-----\r\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDksIfExnLnHrwMbuUt4mgfcoaQ\r\n" +
+    "y+dqzY03OudJtp2nEoEFi8weEXLBYG2hliZ9ig1fxwpOfLjayZMnwIhYrShoNoLZ\r\nROXJ1xZCeomsBq0C4j7jUqeCUzMTWBBJjq9BB0GvKRDanhEBqbA0s8Ntu2er4ykH\r\n" +
+    "rOgcFeQ32elcJX2gowIDAQAB\r\n-----END PUBLIC KEY-----\r\n");
