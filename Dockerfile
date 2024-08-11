@@ -1,4 +1,5 @@
 # 使用基础镜像
+# 这份Dockerfile包含前后端构建还外加Nginx，实际占用巨大。推荐使用backend的dockerfile。手动处理前端编译后的静态资源，资源占用很低。
 FROM ubuntu:20.04
 
 # 设置环境变量以避免交互式提示

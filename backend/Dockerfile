@@ -21,5 +21,9 @@ COPY . .
 # 暴露端口
 EXPOSE 80
 
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo 'Asia/Shanghai' >/etc/timezone
+
 # 启动后端应用
 CMD ["yarn", "build:server"]
