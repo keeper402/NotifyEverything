@@ -86,7 +86,7 @@ condition = "true"
 notify = 'keepAlive'
 msg = ''
 
-# 每天重置本配置。这么配实际是会报错，因为notify不允许留空，但是执行了resetThisConfig效果就达到了，后续会补一下jsNotify
+# 每天重置本配置。每隔6小时一次。
 [rule.resetThisConfigRule]
 cron = '0 0 0/6 * * ?'
 condition = "true"
